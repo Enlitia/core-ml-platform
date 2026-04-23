@@ -3,6 +3,10 @@ from urllib.parse import quote_plus
 
 from pydantic_settings import BaseSettings
 
+# Ensure SM_SETTINGS_MODULE is set when this module is imported
+if not os.getenv("SM_SETTINGS_MODULE"):
+    os.environ["SM_SETTINGS_MODULE"] = "dev"
+
 
 def get_client_config():
     """Get client configuration if available."""

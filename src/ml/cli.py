@@ -27,7 +27,7 @@ from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 def discover_client_name() -> Optional[str]:
     """Get client name from config.py."""
     try:
-        from config import ClientConfig
+        from config import ClientConfig  # type: ignore
         return ClientConfig().client_name
     except (ImportError, AttributeError):
         return None

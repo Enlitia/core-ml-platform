@@ -11,7 +11,7 @@ if not os.getenv("SM_SETTINGS_MODULE"):
 def get_client_config():
     """Get client configuration if available."""
     try:
-        from config import ClientConfig
+        from config import ClientConfig  # type: ignore
         return ClientConfig()
     except ImportError:
         return None

@@ -16,9 +16,7 @@ Usage:
 """
 
 import os
-import sys
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
 import typer
@@ -28,27 +26,14 @@ from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
 def discover_client_name() -> Optional[str]:
     """Try to discover client name from local config.py file."""
-    # Check current directory and parent directories for config.py
-    current_dir = Path.cwd()
-    for directory in [current_dir, *current_dir.parents]:
-        config_file = directory / "config.py"
-        if config_file.exists():
-            try:
-                # Add directory to path temporarily
-                sys.path.insert(0, str(directory))
-                import config
-                # Look for client_name or ClientConfig.client_name
-                if hasattr(config, "ClientConfig"):
-                    config_instance = config.ClientConfig()
-                    if hasattr(config_instance, "client_name"):
-                        return config_instance.client_name
-                # Remove from path
-                sys.path.pop(0)
-            except Exception:
-                # If import fails, continue searching
-                if str(directory) in sys.path:
-                    sys.path.remove(str(directory))
-                continue
+    try:
+        import config
+        if hasattr(config, "ClientConfig"):
+            config_instance = config.ClientConfig()
+            if hasattr(config_instance, "client_name"):
+                return config_instance.client_name
+    except ImportError:
+        pass
     return None
 
 

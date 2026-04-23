@@ -9,8 +9,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from infrastructure.logger import get_logger
-from infrastructure.ml_flow import MLflowGateway
+from core_ml.infrastructure.logger import get_logger
+from core_ml.infrastructure.ml_flow import MLflowGateway
 
 
 @dataclass

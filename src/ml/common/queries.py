@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 from toolkit.configuration import configuration
 
-from core_ml.infrastructure import DBGateway
+from ml.infrastructure import DBGateway
 
 # Assets
 

@@ -6,13 +6,13 @@ Client-specific config should be set by the client repository.
 
 Usage:
     # List available tasks
-    python -m core_ml.cli ml list-tasks
+    python -m ml.cli ml list-tasks
 
     # Train a model
-    python -m core_ml.cli ml train --task advanced_power_forecast
+    python -m ml.cli ml train --task advanced_power_forecast
 
     # Predict
-    python -m core_ml.cli ml predict --task advanced_power_forecast
+    python -m ml.cli ml predict --task advanced_power_forecast
 """
 
 import os
@@ -21,7 +21,7 @@ from typing import Optional
 
 import typer
 
-from core_ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
+from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
 
 def validate_environment() -> None:

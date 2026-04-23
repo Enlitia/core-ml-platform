@@ -3,7 +3,7 @@ import pandas as pd
 import xgboost as xgb
 from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 
-from core_ml.models.base import BaseModel
+from ml.models.base import BaseModel
 
 
 class XGBoostModel(BaseModel):

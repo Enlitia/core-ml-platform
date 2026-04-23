@@ -2,9 +2,9 @@
 
 from typing import Any, Callable
 
-from core_ml.tasks.advanced_power_forecast.config import AdvancedPowerForecastConfig
-from core_ml.tasks.advanced_power_forecast.predict import predict as apf_predict
-from core_ml.tasks.advanced_power_forecast.train import train as apf_train
+from ml.tasks.advanced_power_forecast.config import AdvancedPowerForecastConfig
+from ml.tasks.advanced_power_forecast.predict import predict as apf_predict
+from ml.tasks.advanced_power_forecast.train import train as apf_train
 
 TASK_CONFIG_REGISTRY: dict[str, Any] = {
     "advanced_power_forecast": AdvancedPowerForecastConfig(),

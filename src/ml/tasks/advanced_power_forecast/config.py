@@ -1,6 +1,6 @@
 """Configuration for Advanced Power Forecast task."""
 
-from core_ml.tasks.base import BaseTaskConfig
+from ml.tasks.base import BaseTaskConfig
 
 
 class AdvancedPowerForecastConfig(BaseTaskConfig):

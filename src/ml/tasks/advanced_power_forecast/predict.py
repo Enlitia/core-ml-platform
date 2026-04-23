@@ -3,15 +3,15 @@ from datetime import datetime
 import pandas as pd
 import typer
 
-from core_ml.common.assets import (convert_input_from_df_to_dict,
+from ml.common.assets import (convert_input_from_df_to_dict,
                               select_only_valid_asset_ids)
-from core_ml.common.dates import get_dates
-from core_ml.common.queries import (fetch_power_forecast_data_for_prediction,
+from ml.common.dates import get_dates
+from ml.common.queries import (fetch_power_forecast_data_for_prediction,
                                save_advanced_power_forecast_predictions)
-from core_ml.common.validations import (validate_inputs_prediction,
+from ml.common.validations import (validate_inputs_prediction,
                                    validate_not_empty)
-from core_ml.context import Context, get_context
-from core_ml.tasks.advanced_power_forecast.utils.preprocess import \
+from ml.context import Context, get_context
+from ml.tasks.advanced_power_forecast.utils.preprocess import \
     preprocess_power_forecast_data
 
 app = typer.Typer()

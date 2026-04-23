@@ -1,6 +1,6 @@
 import pandas as pd
 
-from core_ml.common.queries import _fetch_list_all_available_asset_ids
+from ml.common.queries import _fetch_list_all_available_asset_ids
 
 
 def _parse_asset_ids(asset_id: str) -> list[int] | str:

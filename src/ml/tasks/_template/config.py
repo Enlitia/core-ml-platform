@@ -1,6 +1,6 @@
 """Configuration for Template task - copy and adapt for your task."""
 
-from core_ml.tasks.base import BaseTaskConfig
+from ml.tasks.base import BaseTaskConfig
 
 
 class TemplateTaskConfig(BaseTaskConfig):

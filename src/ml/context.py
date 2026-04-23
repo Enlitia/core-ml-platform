@@ -9,8 +9,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from core_ml.infrastructure.logger import get_logger
-from core_ml.infrastructure.ml_flow import MLflowGateway
+from ml.infrastructure.logger import get_logger
+from ml.infrastructure.ml_flow import MLflowGateway
 
 
 @dataclass
@@ -45,7 +45,7 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
         context = get_context("advanced_power_forecast", model_name="xgboost")
     """
     # Import here to avoid circular import
-    from core_ml.tasks import get_task_config
+    from ml.tasks import get_task_config
 
     task_config = get_task_config(task_name)
 

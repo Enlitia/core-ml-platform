@@ -9,7 +9,7 @@ description = "Core ML Platform - Reusable ML framework for time series forecast
 authors = ["Enlitia <dev@enlitia.pt>"]
 readme = "README.md"
 packages = [
-    {include = "core_ml", from = "src"},
+    {include = "ml", from = "src"},
     {include = "configs", from = "src"}
 ]
 

@@ -16,7 +16,9 @@ Usage:
 """
 
 import os
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import typer
@@ -24,8 +26,41 @@ import typer
 from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
 
+def discover_client_name() -> Optional[str]:
+    """Try to discover client name from local config.py file."""
+    # Check current directory and parent directories for config.py
+    current_dir = Path.cwd()
+    for directory in [current_dir, *current_dir.parents]:
+        config_file = directory / "config.py"
+        if config_file.exists():
+            try:
+                # Add directory to path temporarily
+                sys.path.insert(0, str(directory))
+                import config
+                # Look for client_name or ClientConfig.client_name
+                if hasattr(config, "ClientConfig"):
+                    config_instance = config.ClientConfig()
+                    if hasattr(config_instance, "client_name"):
+                        return config_instance.client_name
+                # Remove from path
+                sys.path.pop(0)
+            except Exception:
+                # If import fails, continue searching
+                if str(directory) in sys.path:
+                    sys.path.remove(str(directory))
+                continue
+    return None
+
+
 def validate_environment() -> None:
     """Validate that required environment variables are set."""
+    # Try to auto-discover client name from config.py
+    if not os.getenv("CLIENT_NAME"):
+        discovered_client = discover_client_name()
+        if discovered_client:
+            os.environ["CLIENT_NAME"] = discovered_client
+            typer.echo(f"ℹ️  Auto-detected client: {discovered_client}", err=True)
+    
     required_vars = ["CLIENT_NAME"]
     missing = [var for var in required_vars if not os.getenv(var)]
 
@@ -33,6 +68,7 @@ def validate_environment() -> None:
         typer.echo(f"❌ Missing required environment variables: {', '.join(missing)}", err=True)
         typer.echo("\nSet them via:", err=True)
         typer.echo("  export CLIENT_NAME=erg", err=True)
+        typer.echo("\nOr create a config.py file with ClientConfig class containing client_name.", err=True)
         raise typer.Exit(code=1)
 
     # Set default environment if not specified

@@ -6,13 +6,13 @@ Client-specific config should be set by the client repository.
 
 Usage:
     # List available tasks
-    python -m ml.cli ml list-tasks
+    python -m ml list-tasks
 
     # Train a model
-    python -m ml.cli ml train --task advanced_power_forecast
+    python -m ml train --task advanced_power_forecast
 
     # Predict
-    python -m ml.cli ml predict --task advanced_power_forecast
+    python -m ml predict --task advanced_power_forecast
 """
 
 import os
@@ -54,15 +54,8 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-# Machine learning module
-ml_app = typer.Typer(
-    help="Machine Learning operations",
-    name="ML",
-    no_args_is_help=True,
-)
 
-
-@ml_app.command(name="train")
+@app.command(name="train")
 def train_task(
     task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
     model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
@@ -87,7 +80,7 @@ def train_task(
         raise typer.Exit(code=1)
 
 
-@ml_app.command(name="predict")
+@app.command(name="predict")
 def predict_task(
     task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
     model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
@@ -122,7 +115,7 @@ def predict_task(
         raise typer.Exit(code=1)
 
 
-@ml_app.command(name="list-tasks")
+@app.command(name="list-tasks")
 def list_tasks() -> None:
     """List all available ML tasks."""
     typer.echo("Available ML tasks:\n")
@@ -130,9 +123,6 @@ def list_tasks() -> None:
         model_name = getattr(config, "model_name", "N/A")
         typer.echo(f"  • {task_name:<30} (model: {model_name})")
     typer.echo(f"\nTotal: {len(TASK_CONFIG_REGISTRY)} tasks")
-
-
-app.add_typer(ml_app, name="ml", help="Machine learning operations")
 
 
 @app.command(name="update-nomad-configs")

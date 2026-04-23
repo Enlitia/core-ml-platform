@@ -25,38 +25,26 @@ from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
 
 def discover_client_name() -> Optional[str]:
-    """Try to discover client name from local config.py file."""
+    """Get client name from config.py."""
     try:
-        import config
-        if hasattr(config, "ClientConfig"):
-            config_instance = config.ClientConfig()
-            if hasattr(config_instance, "client_name"):
-                return config_instance.client_name
-    except ImportError:
-        pass
-    return None
+        from config import ClientConfig
+        return ClientConfig().client_name
+    except (ImportError, AttributeError):
+        return None
 
 
 def validate_environment() -> None:
     """Validate that required environment variables are set."""
-    # Try to auto-discover client name from config.py
     if not os.getenv("CLIENT_NAME"):
         discovered_client = discover_client_name()
         if discovered_client:
             os.environ["CLIENT_NAME"] = discovered_client
-            typer.echo(f"ℹ️  Auto-detected client: {discovered_client}", err=True)
     
-    required_vars = ["CLIENT_NAME"]
-    missing = [var for var in required_vars if not os.getenv(var)]
-
-    if missing:
-        typer.echo(f"❌ Missing required environment variables: {', '.join(missing)}", err=True)
-        typer.echo("\nSet them via:", err=True)
-        typer.echo("  export CLIENT_NAME=erg", err=True)
-        typer.echo("\nOr create a config.py file with ClientConfig class containing client_name.", err=True)
+    if not os.getenv("CLIENT_NAME"):
+        typer.echo(f"❌ Missing CLIENT_NAME", err=True)
+        typer.echo("Create a config.py with ClientConfig class containing client_name", err=True)
         raise typer.Exit(code=1)
 
-    # Set default environment if not specified
     if not os.getenv("SM_SETTINGS_MODULE"):
         os.environ["SM_SETTINGS_MODULE"] = "dev"
 

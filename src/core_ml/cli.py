@@ -1,24 +1,18 @@
 """
-Service Core ML CLI - Main interface for ML operations.
+Core ML Platform CLI - Main interface for ML operations.
 
-This CLI provides a unified interface to run ML tasks across different clients.
+This CLI runs ML tasks using configuration from environment variables.
+Client-specific config should be set by the client repository.
 
 Usage:
-    # List available clients
-    python -m cli ml list-clients
-
     # List available tasks
-    python -m cli ml list-tasks
+    python -m core_ml.cli ml list-tasks
 
-    # Train a model (using env vars for client config)
-    export CLIENT_NAME=erg
-    python -m cli ml train --task advanced_power_forecast
-
-    # Train with client config via CLI
-    python -m cli ml train --task advanced_power_forecast --client erg --env dev
+    # Train a model
+    python -m core_ml.cli ml train --task advanced_power_forecast
 
     # Predict
-    python -m cli ml predict --task advanced_power_forecast --client erg
+    python -m core_ml.cli ml predict --task advanced_power_forecast
 """
 
 import os
@@ -27,60 +21,23 @@ from typing import Optional
 
 import typer
 
-from clients import get_client, list_clients
 from core_ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
-
-
-def set_client_environment(
-    client: Optional[str] = None,
-    env: Optional[str] = None,
-) -> None:
-    """Set client-specific environment variables from client registry.
-
-    Args:
-        client: Client name to load config for
-        env: Environment (dev/production), defaults to 'dev' if not set
-    """
-    if client:
-        try:
-            client_config = get_client(client)
-            os.environ["CLIENT_NAME"] = client_config.client_name
-            os.environ["DB_USER"] = client_config.db_user
-            os.environ["DB_PASSWORD"] = client_config.db_password
-            os.environ["DB_NAME"] = client_config.db_name or client_config.client_name
-        except KeyError as e:
-            typer.echo(f"❌ {e}", err=True)
-            typer.echo(f"Available clients: {', '.join(list_clients())}", err=True)
-            raise typer.Exit(code=1)
-
-    # Set environment: explicit parameter > existing env var > default to 'dev'
-    if env:
-        os.environ["SM_SETTINGS_MODULE"] = env
-    elif not os.getenv("SM_SETTINGS_MODULE"):
-        os.environ["SM_SETTINGS_MODULE"] = "dev"
 
 
 def validate_environment() -> None:
     """Validate that required environment variables are set."""
-    required_vars = ["CLIENT_NAME", "DB_USER", "DB_PASSWORD"]
+    required_vars = ["CLIENT_NAME"]
     missing = [var for var in required_vars if not os.getenv(var)]
 
     if missing:
         typer.echo(f"❌ Missing required environment variables: {', '.join(missing)}", err=True)
         typer.echo("\nSet them via:", err=True)
-        typer.echo("  - Environment: export CLIENT_NAME=erg", err=True)
-        typer.echo(f"  - CLI flag: --client erg (available: {', '.join(list_clients())})", err=True)
+        typer.echo("  export CLIENT_NAME=erg", err=True)
         raise typer.Exit(code=1)
 
-    # Check SM_SETTINGS_MODULE (should already be set by set_client_environment)
-    env_module = os.getenv("SM_SETTINGS_MODULE", "")
-    if not env_module:
-        # This should not happen if set_client_environment was called
-        typer.echo("⚠️  SM_SETTINGS_MODULE not set, defaulting to 'dev'", err=True)
+    # Set default environment if not specified
+    if not os.getenv("SM_SETTINGS_MODULE"):
         os.environ["SM_SETTINGS_MODULE"] = "dev"
-    elif env_module not in ("dev", "production"):
-        typer.echo(f"❌ Invalid SM_SETTINGS_MODULE '{env_module}'. Must be 'dev' or 'production'", err=True)
-        raise typer.Exit(code=1)
 
 
 def check_environment() -> None:
@@ -93,7 +50,7 @@ def check_environment() -> None:
 
 
 app = typer.Typer(
-    help="Service Core ML CLI - Unified interface for ML operations",
+    help="Core ML Platform CLI - Unified interface for ML operations",
     no_args_is_help=True,
 )
 
@@ -108,15 +65,10 @@ ml_app = typer.Typer(
 @ml_app.command(name="train")
 def train_task(
     task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
-    client: str = typer.Option(..., help="Client name (loads config from registry)"),
     model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
     asset_ids: str = typer.Option("all", help="Asset IDs: 'all', single ID, or comma-separated IDs"),
-    env: Optional[str] = typer.Option(
-        None, help="Environment: dev or production (overrides SM_SETTINGS_MODULE, defaults to 'dev')"
-    ),
 ) -> None:
     """Train a model for a specific task."""
-    set_client_environment(client, env)
     validate_environment()
     check_environment()
 
@@ -138,16 +90,11 @@ def train_task(
 @ml_app.command(name="predict")
 def predict_task(
     task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
-    client: str = typer.Option(..., help="Client name (loads config from registry)"),
     model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
     asset_ids: str = typer.Option("all", help="Asset IDs: 'all', single ID, or comma-separated IDs"),
     start_date: Optional[str] = typer.Option(None, help="Start date (ISO format, default: now)"),
-    env: Optional[str] = typer.Option(
-        None, help="Environment: dev or production (overrides SM_SETTINGS_MODULE, defaults to 'dev')"
-    ),
 ) -> None:
     """Generate predictions for a specific task."""
-    set_client_environment(client, env)
     validate_environment()
     check_environment()
 
@@ -183,17 +130,6 @@ def list_tasks() -> None:
         model_name = getattr(config, "model_name", "N/A")
         typer.echo(f"  • {task_name:<30} (model: {model_name})")
     typer.echo(f"\nTotal: {len(TASK_CONFIG_REGISTRY)} tasks")
-
-
-@ml_app.command(name="list-clients")
-def list_available_clients() -> None:
-    """List all available clients."""
-    clients = list_clients()
-    typer.echo("Available clients:\n")
-    for client_name in clients:
-        typer.echo(f"  • {client_name}")
-    typer.echo(f"\nTotal: {len(clients)} clients")
-    typer.echo("\nTo add a new client, update src/configs/clients/__init__.py")
 
 
 app.add_typer(ml_app, name="ml", help="Machine learning operations")

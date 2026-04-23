@@ -33,26 +33,12 @@ def discover_client_name() -> Optional[str]:
         return None
 
 
-def load_client_config() -> None:
-    """Load client configuration and set environment variables."""
-    try:
-        from config import ClientConfig
-        client_config = ClientConfig()
-        
-        # Set all config values as environment variables
-        os.environ["CLIENT_NAME"] = client_config.client_name
-        os.environ["DB_NAME"] = client_config.db_name
-        os.environ["DB_USER"] = client_config.db_user
-        os.environ["DB_PASSWORD"] = client_config.db_password
-        
-    except (ImportError, AttributeError):
-        pass
-
-
 def validate_environment() -> None:
     """Validate that required environment variables are set."""
-    # Load client config first
-    load_client_config()
+    if not os.getenv("CLIENT_NAME"):
+        discovered_client = discover_client_name()
+        if discovered_client:
+            os.environ["CLIENT_NAME"] = discovered_client
     
     if not os.getenv("CLIENT_NAME"):
         typer.echo(f"❌ Missing CLIENT_NAME", err=True)

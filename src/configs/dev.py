@@ -4,20 +4,34 @@ from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
 
 
+def get_client_config():
+    """Get client configuration if available."""
+    try:
+        from config import ClientConfig
+        return ClientConfig()
+    except ImportError:
+        return None
+
+
+client_config = get_client_config()
+
+
 class Settings(BaseSettings):
     """Specific attributes for the DEVELOPMENT environment"""
 
     # Client Configuration
-    client_name: str = os.getenv("CLIENT_NAME", "")
+    client_name: str = client_config.client_name if client_config else os.getenv("CLIENT_NAME", "")
 
     # Database Configuration
-    db_name: str = os.getenv("DB_NAME", client_name)
+    db_name: str = client_config.db_name if client_config else os.getenv("DB_NAME", client_name)
+    db_user: str = client_config.db_user if client_config else os.getenv("DB_USER", "")
+    db_password: str = client_config.db_password if client_config else os.getenv("DB_PASSWORD", "")
 
     databases: dict[str, str] = {
         "default": (
             "postgresql://{user}:{password}@192.168.60.18:5432/{db_name}".format(
-                user=os.getenv("DB_USER", ""),
-                password=quote_plus(os.getenv("DB_PASSWORD", "")),
+                user=db_user,
+                password=quote_plus(db_password),
                 db_name=db_name,
             )
         ),

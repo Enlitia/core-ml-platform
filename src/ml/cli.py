@@ -120,7 +120,7 @@ def list_tasks() -> None:
     """List all available ML tasks."""
     typer.echo("Available ML tasks:\n")
     for task_name, config in TASK_CONFIG_REGISTRY.items():
-        model_name = getattr(config, "model_name", "N/A")
+        model_name = getattr(config, "default_model_name", "N/A")
         typer.echo(f"  • {task_name:<30} (model: {model_name})")
     typer.echo(f"\nTotal: {len(TASK_CONFIG_REGISTRY)} tasks")
 

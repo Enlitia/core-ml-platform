@@ -1,0 +1,73 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "core-ml-platform"
+version = "0.1.0"
+description = "Core ML Platform - Reusable ML framework for time series forecasting"
+authors = ["Enlitia <dev@enlitia.pt>"]
+readme = "README.md"
+packages = [
+    {include = "core_ml", from = "src"},
+    {include = "configs", from = "src"}
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+pandas = "^2.2.0"
+mlflow = "^2.11.0"
+scikit-learn = "^1.4.1"
+numpy = "^1.26.4"
+pydantic-settings = "^2.2.1"
+typer = "^0.16.0"
+python-toolkit = {path = "dependencies/python_toolkit-5.2.1.tar.gz"}
+great-expectations = "^1.16.0"
+python-logging-loki = "^0.3.1"
+xgboost = "^3.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.6.0"
+black = "^24.0.0"
+isort = "^5.13.0"
+mypy = "^1.8.0"
+ruff = "^0.2.0"
+pandas-stubs = "^2.0.0"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = false
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = "toolkit.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mlflow.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sklearn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "xgboost.*"
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

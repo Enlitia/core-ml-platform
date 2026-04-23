@@ -1,0 +1,32 @@
+default_language_version:
+  python: python3
+fail_fast: true
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.3.0 
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+  # Could not find a way oh having isort to work in the make
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort workaround
+        entry: poetry run isort
+        language: system
+        files: (src/*|tests/*)
+  - repo: local
+    hooks:
+      - id: format
+        name: format
+        entry: make format
+        language: system
+        files: (src/*|tests/*)
+  - repo: local
+    hooks:
+      - id: static-analysis
+        name: static-analysis
+        entry: make static-analysis
+        language: system
+        files: (src/*|tests/*)

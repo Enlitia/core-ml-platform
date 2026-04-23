@@ -2,9 +2,10 @@
   "include": ["src"],
   "exclude": [
     "**/node_modules",
-    "**/__pycache__",
-    ".venv"
+    "**/__pycache__"
   ],
+  "venvPath": ".",
+  "venv": ".venv",
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
   "reportAttributeAccessIssue": "none",

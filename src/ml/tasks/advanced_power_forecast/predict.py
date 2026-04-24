@@ -31,9 +31,11 @@ def get_prediction_inputs_all_assets(
     return dict_input_all_assets
 
 
-def preprocess_prediction_data(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_prediction_data(df: pd.DataFrame, providers: list[str]) -> pd.DataFrame:
     """Preprocess power forecast data for prediction."""
     X = df.drop(columns=["asset_id"]).copy()
+
+    X = X[providers]
 
     # Fillna power with row avg, then with 0 if row avg is NaN
     X = X.apply(lambda row: row.fillna(row.mean()), axis=1)
@@ -52,7 +54,9 @@ def predict_one_asset(
         "available_date",
         "prediction_date",
         "asset_id",
+        "model_name",
         "providers",
+        "model_params",
         "prediction",
     ]
 
@@ -60,14 +64,14 @@ def predict_one_asset(
 
     context.logger.info(f"Predicting for asset {asset_id} with {len(data)} timestamps")
 
-    # Preprocess
-    X = preprocess_prediction_data(data)
-
-    validate_inputs_prediction(X, asset_id)
-
     # Get Model
     model, params = context.mlflow_gateway.load_model(context.model_name, asset_id)
     providers = params.get("providers", [])
+
+    # Preprocess
+    X = preprocess_prediction_data(data, providers)
+
+    validate_inputs_prediction(X, asset_id)
 
     # Generate predictions
     predictions = model.predict(X)
@@ -78,7 +82,9 @@ def predict_one_asset(
             "available_date": start_date,
             "prediction_date": X.index.values,
             "asset_id": asset_id,
+            "model_name": context.model_name,
             "providers": str(providers),
+            "model_params": [params] * len(predictions),
             "prediction": predictions,
         },
         columns=output_cols,

@@ -4,8 +4,9 @@ from typing import Any
 import mlflow
 import mlflow.sklearn
 import pandas as pd
-from sklearn.base import BaseEstimator
 from toolkit.configuration import configuration
+
+from ml.models.base import BaseModel
 
 # Suppress MLflow's verbose logging
 logging.getLogger("mlflow").setLevel(logging.WARNING)
@@ -30,7 +31,7 @@ class MLflowGateway:
 
     def save_model(
         self,
-        model: BaseEstimator,
+        model: BaseModel,
         input_example: pd.DataFrame,
         asset_id: int | None = None,
         metrics: dict[str, float] | None = None,
@@ -69,7 +70,7 @@ class MLflowGateway:
         model_version = model_info.registered_model_version
         self.mlflow_client.set_registered_model_alias(name=run_name, alias="champion", version=model_version)
 
-    def load_model(self, model_name: str, asset_id: int | None = None) -> tuple[BaseEstimator, dict[str, Any]]:
+    def load_model(self, model_name: str, asset_id: int | None = None) -> tuple[BaseModel, dict[str, Any]]:
         """Load trained model from MLflow Model Registry."""
         registered_model_name = f"{model_name}_client_{self.client_name}"
         if asset_id is not None:
@@ -78,7 +79,7 @@ class MLflowGateway:
         # Load model by alias (replaces deprecated Production stage)
         try:
             model_uri = f"models:/{registered_model_name}@champion"
-            trained_model = mlflow.sklearn.load_model(model_uri)
+            trained_model: BaseModel = mlflow.sklearn.load_model(model_uri)
 
             # Get model version info to retrieve run_id and params
             model_version_info = self.mlflow_client.get_model_version_by_alias(registered_model_name, "champion")

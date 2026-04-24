@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
-from sqlalchemy import text
+from alembic.models.machine_learning import AdvancedPowerForecastData
 from toolkit.data.query import Query
 from toolkit.database import database
 
@@ -127,46 +127,35 @@ def fetch_power_forecast_data_for_prediction(
     return result
 
 
-def _prepare_dataframe_for_insert(df: pd.DataFrame) -> pd.DataFrame:
-    """Prepare dataframe for database insert by replacing NaN with None."""
-    df_obj = df.astype(object)
-    null_mask: pd.DataFrame = pd.notnull(df_obj)
-    df_clean: pd.DataFrame = df_obj.where(null_mask, None)  # type: ignore[call-overload]
-    return df_clean
+def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
+    """Save advanced power forecast predictions to database using ORM.
 
+    Uses session.merge() for automatic INSERT or UPDATE based on primary key.
 
-def upsert_df(df: pd.DataFrame, table_name: str, conflict_columns: list[str]) -> None:
-    """Generic function to save dataframe to database with conflict resolution."""
+    Expected DataFrame columns:
+        - asset_id: int
+        - model_name: str (e.g., 'positive_linear', 'xgboost')
+        - available_date: datetime
+        - prediction_date: datetime
+        - providers: str (JSON string)
+        - model_params: dict (will be stored as JSONB)
+        - prediction: float
+    """
     if df.empty:
         return
 
-    df_clean = _prepare_dataframe_for_insert(df)
-
-    columns = list(df_clean.columns)
-
-    # PostgreSQL: ON CONFLICT (columns) DO UPDATE SET ...
-    cols_str = ", ".join(columns)
-    placeholders = ", ".join([f":{col}" for col in columns])
-    conflict_str = ", ".join(conflict_columns)
-    update_pairs = ", ".join([f"{col} = EXCLUDED.{col}" for col in columns])
-
-    query_str = f"""
-        INSERT INTO {table_name} ({cols_str})
-        VALUES ({placeholders})
-        ON CONFLICT ({conflict_str}) DO UPDATE SET {update_pairs}
-    """
-
     with database.session() as session:
-        for _, row in df_clean.iterrows():
-            params = {str(k): v for k, v in row.to_dict().items()}
-            session.execute(text(query_str), params)
+        for _, row in df.iterrows():
+            # Create ORM object - merge will INSERT or UPDATE based on unique constraint
+            prediction = AdvancedPowerForecastData(
+                asset_id=int(row["asset_id"]),
+                model_name=str(row["model_name"]),
+                available_date=row["available_date"],
+                prediction_date=row["prediction_date"],
+                providers=str(row["providers"]) if pd.notna(row["providers"]) else None,
+                model_params=row["model_params"] if pd.notna(row["model_params"]) else None,
+                prediction=float(row["prediction"]),
+            )
+            session.merge(prediction)
+
         session.commit()
-
-
-def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
-    """Save advanced power forecast predictions to database."""
-    upsert_df(
-        df=df,
-        table_name="data_lake.advanced_power_forecast_data",
-        conflict_columns=["asset_id", "prediction_date", "available_date"],
-    )

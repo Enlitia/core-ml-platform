@@ -24,6 +24,7 @@ typer = "^0.16.0"
 python-toolkit = {path = "dependencies/python_toolkit-5.18.2.tar.gz"}
 great-expectations = "^1.16.0"
 xgboost = "^3.2.0"
+service-erg-data-infra = {path = "../service-erg-data-infra", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.0"
@@ -50,13 +51,20 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "mlflow.*"
 ignore_missing_imports = true
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "sklearn.*"
 ignore_missing_imports = true
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "xgboost.*"
+ignore_missing_imports = true
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "alembic.*"
 ignore_missing_imports = true
 
 [tool.black]

@@ -13,7 +13,7 @@ class DBGateway:
         with database.session() as session:
             result = session.execute(text(query))
             data = result.fetchall()
-            columns = result.keys()
+            columns = list(result.keys())
             df = pd.DataFrame(data, columns=columns)
         return df
 
@@ -72,6 +72,7 @@ class DBGateway:
 
             # Execute for each row
             for _, row in df_clean.iterrows():
-                session.execute(text(query), row.to_dict())
+                params = {str(k): v for k, v in row.to_dict().items()}
+                session.execute(text(query), params)
 
             session.commit()

@@ -28,7 +28,9 @@ def discover_client_name() -> Optional[str]:
     """Get client name from config.py."""
     try:
         from config import ClientConfig  # type: ignore
-        return ClientConfig().client_name
+
+        client_name: str = ClientConfig().client_name
+        return client_name
     except (ImportError, AttributeError):
         return None
 
@@ -39,9 +41,9 @@ def validate_environment() -> None:
         discovered_client = discover_client_name()
         if discovered_client:
             os.environ["CLIENT_NAME"] = discovered_client
-    
+
     if not os.getenv("CLIENT_NAME"):
-        typer.echo(f"❌ Missing CLIENT_NAME", err=True)
+        typer.echo("❌ Missing CLIENT_NAME", err=True)
         typer.echo("Create a config.py with ClientConfig class containing client_name", err=True)
         raise typer.Exit(code=1)
 

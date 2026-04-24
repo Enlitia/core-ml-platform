@@ -1,18 +1,13 @@
 import pandas as pd
 import typer
 
-from ml.common.assets import (convert_input_from_df_to_dict,
-                              select_only_valid_asset_ids)
-from ml.common.queries import (fetch_power_forecast_data_for_train,
-                               fetch_power_real_data_for_train)
+from ml.common.assets import convert_input_from_df_to_dict, select_only_valid_asset_ids
+from ml.common.queries import fetch_power_forecast_data_for_train, fetch_power_real_data_for_train
 from ml.common.split_data import split_data_by_day
-from ml.common.validations import (validate_inputs_training,
-                                   validate_model_quality,
-                                   validate_out_of_range)
+from ml.common.validations import validate_inputs_training, validate_model_quality, validate_out_of_range
 from ml.context import Context, get_context
 from ml.models import BaseModel, get_model
-from ml.tasks.advanced_power_forecast.utils.preprocess import \
-    preprocess_power_forecast_data
+from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
 

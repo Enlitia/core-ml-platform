@@ -79,7 +79,7 @@ class MLflowGateway:
         # Load model by alias (replaces deprecated Production stage)
         try:
             model_uri = f"models:/{registered_model_name}@champion"
-            trained_model: BaseModel = mlflow.sklearn.load_model(model_uri)
+            trained_model = mlflow.sklearn.load_model(model_uri)
 
             # Get model version info to retrieve run_id and params
             model_version_info = self.mlflow_client.get_model_version_by_alias(registered_model_name, "champion")

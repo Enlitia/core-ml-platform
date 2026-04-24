@@ -24,7 +24,7 @@ typer = "^0.16.0"
 python-toolkit = {path = "dependencies/python_toolkit-5.18.2.tar.gz"}
 great-expectations = "^1.16.0"
 xgboost = "^3.2.0"
-service-erg-data-infra = {path = "../service-erg-data-infra", develop = true}
+service-erg-data-infra = {git = "ssh://git@github.com/Enlitia/service-erg-data-infra.git", subdirectory = ".", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.0"

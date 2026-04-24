@@ -5,9 +5,10 @@ toolkit.configuration.settings throughout the codebase. This Context only
 manages task-specific config and utilities.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Any
+
+from toolkit.logging import StructuredLogger
 
 from ml.infrastructure.logger import get_logger
 from ml.infrastructure.ml_flow import MLflowGateway
@@ -26,7 +27,7 @@ class Context:
 
     model_name: str  # Active model name (resolved from CLI or config default)
     task_config: Any  # Task-specific ML parameters (training_interval, etc.)
-    logger: logging.Logger  # Logger instance for this task
+    logger: StructuredLogger  # Logger instance for this task
     mlflow_gateway: MLflowGateway  # MLflow interface for model storage
 
 

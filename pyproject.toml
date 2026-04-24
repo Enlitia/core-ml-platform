@@ -23,7 +23,6 @@ pydantic-settings = "^2.2.1"
 typer = "^0.16.0"
 python-toolkit = {path = "dependencies/python_toolkit-5.2.1.tar.gz"}
 great-expectations = "^1.16.0"
-python-logging-loki = "^0.3.1"
 xgboost = "^3.2.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -58,10 +57,6 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "xgboost.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "logging_loki.*"
 ignore_missing_imports = true
 
 [tool.black]

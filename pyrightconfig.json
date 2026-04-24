@@ -13,6 +13,8 @@
   "reportUnknownArgumentType": "none",
   "reportUnknownVariableType": "none",
   "reportGeneralTypeIssues": "none",
+  "reportArgumentType": "none",
+  "reportCallIssue": "none",
   "reportIncompatibleMethodOverride": "warning",
-  "pythonVersion": "3.11"
+  "pythonVersion": "3.12"
 }

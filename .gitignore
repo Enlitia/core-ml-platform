@@ -21,6 +21,7 @@ env/
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # Testing
 .pytest_cache/

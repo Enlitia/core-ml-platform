@@ -8,9 +8,8 @@ manages task-specific config and utilities.
 from dataclasses import dataclass
 from typing import Any
 
-from toolkit.logging import StructuredLogger
+from toolkit.logging import StructuredLogger, get_logger
 
-from ml.infrastructure.logger import get_logger
 from ml.infrastructure.ml_flow import MLflowGateway
 
 

@@ -20,6 +20,7 @@ from typing import Annotated
 
 import typer
 from toolkit.cli import StartDate
+from toolkit.logging import configure_logging
 
 from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
@@ -169,7 +170,15 @@ def callback() -> None:
     Run ML tasks (train/predict) for different clients and environments.
     Each client has its own database and configuration.
     """
-    pass
+    # Configure logging once at startup
+    env = os.getenv("ENV", "dev")
+    format_type = "json" if env == "production" else "console"
+
+    configure_logging(
+        project="core-ml-platform",
+        service=os.getenv("CLIENT_NAME", "ml-tasks"),
+        config={"level": "INFO", "format_type": format_type},
+    )
 
 
 if __name__ == "__main__":

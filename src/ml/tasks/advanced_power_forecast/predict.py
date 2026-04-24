@@ -5,9 +5,12 @@ import typer
 
 from ml.common.assets import convert_input_from_df_to_dict, select_only_valid_asset_ids
 from ml.common.dates import get_dates
-from ml.common.queries import fetch_power_forecast_data_for_prediction, save_advanced_power_forecast_predictions
 from ml.common.validations import validate_inputs_prediction, validate_not_empty
 from ml.context import Context, get_context
+from ml.queries.advanced_power_forecast import (
+    fetch_power_forecast_data_for_prediction,
+    save_advanced_power_forecast_predictions,
+)
 from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()

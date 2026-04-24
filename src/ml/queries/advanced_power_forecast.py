@@ -1,30 +1,43 @@
 from datetime import datetime
 
 import pandas as pd
-from alembic.models.machine_learning import AdvancedPowerForecastData
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import DeclarativeBase
 from toolkit.data.query import Query
 from toolkit.database import database
 
 
-def _fetch_list_all_available_asset_ids(list_asset_types: list[str] = ["Wind farm", "Solar farm"]) -> list[int]:
-    """Get list of all available asset ids."""
-    sql_query = """
-    SELECT
-        asset.id AS asset_id
-    FROM
-        data_lake.asset AS asset
-    INNER JOIN
-        data_lake.asset_type AS asset_type
-    	ON asset.asset_type_id = asset_type.id
-    ORDER BY 1
-    """
-    query = Query(sql_query)
-    query.with_in("asset_type.name", list_asset_types)
-    with database.session() as session:
-        result = session.execute(query.prepared_statement).mappings().fetchall()
+class Base(DeclarativeBase):
+    """Base class for ORM models."""
 
-    list_asset_ids = [row["asset_id"] for row in result]
-    return list_asset_ids
+    pass
+
+
+class AdvancedPowerForecastData(Base):
+    """Model for advanced power forecast predictions."""
+
+    __tablename__ = "advanced_power_forecast_data"
+    __table_args__ = (
+        UniqueConstraint(
+            "asset_id",
+            "prediction_date",
+            "available_date",
+            name="uq_advanced_power_forecast_data",
+        ),
+        {"schema": "machine_learning"},
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    asset_id = Column(Integer, ForeignKey("data_lake.asset.id"), nullable=False, index=True)
+    model_name = Column(String, nullable=False, index=True)
+    available_date = Column(DateTime, nullable=False, index=True)
+    prediction_date = Column(DateTime, nullable=False, index=True)
+    providers = Column(String, nullable=True)
+    model_params = Column(JSONB, nullable=True)
+    prediction = Column(Float, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
+    updated_at = Column(DateTime, nullable=True, server_default="CURRENT_TIMESTAMP")
 
 
 # Train Advanced Power Forecast

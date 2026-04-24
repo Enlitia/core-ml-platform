@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ml.common.queries import _fetch_list_all_available_asset_ids
+from ml.queries.assets import _fetch_list_all_available_asset_ids
 
 
 def _parse_asset_ids(asset_id: str) -> list[int] | str:
@@ -33,6 +33,9 @@ def _filter_invalid_asset_ids(list_asset_ids: list[int] | str, list_all_availabl
     """Filter out invalid asset ids from the input list."""
     if list_asset_ids == "all":
         return list_all_available_asset_ids
+
+    if not isinstance(list_asset_ids, list):
+        raise TypeError(f"Expected list[int] or 'all', got {type(list_asset_ids).__name__}: {list_asset_ids}")
 
     list_valid_asset_ids = [id for id in list_asset_ids if id in list_all_available_asset_ids]
     return list_valid_asset_ids

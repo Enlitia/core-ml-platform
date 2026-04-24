@@ -50,19 +50,20 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
     task_config = get_task_config(task_name)
 
     # Resolve model name (CLI override or config default)
-    model_name = model_name or task_config.default_model_name
+    resolved_model_name = model_name or task_config.default_model_name
 
     # Validate model is available for this task
-    if model_name not in task_config.available_models:
+    if resolved_model_name not in task_config.available_models:
         raise ValueError(
-            f"Invalid model '{model_name}' for task '{task_name}'. " f"Available: {task_config.available_models}"
+            f"Invalid model '{resolved_model_name}' for task '{task_name}'. "
+            f"Available: {task_config.available_models}"
         )
 
     logger = get_logger(task_config.task_name)
     mlflow_gateway = MLflowGateway(task_config.task_name)
 
     return Context(
-        model_name=model_name,
+        model_name=resolved_model_name,
         task_config=task_config,
         logger=logger,
         mlflow_gateway=mlflow_gateway,

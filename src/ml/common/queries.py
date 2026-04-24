@@ -1,10 +1,9 @@
 from datetime import datetime
 
 import pandas as pd
+from sqlalchemy import text
 from toolkit.data.query import Query
 from toolkit.database import database
-
-from ml.infrastructure import DBGateway
 
 
 def _fetch_list_all_available_asset_ids(list_asset_types: list[str] = ["Wind farm", "Solar farm"]) -> list[int]:
@@ -128,9 +127,45 @@ def fetch_power_forecast_data_for_prediction(
     return result
 
 
+def _prepare_dataframe_for_insert(df: pd.DataFrame) -> pd.DataFrame:
+    """Prepare dataframe for database insert by replacing NaN with None."""
+    df_obj = df.astype(object)
+    null_mask: pd.DataFrame = pd.notnull(df_obj)
+    df_clean: pd.DataFrame = df_obj.where(null_mask, None)  # type: ignore[call-overload]
+    return df_clean
+
+
+def upsert_df(df: pd.DataFrame, table_name: str, conflict_columns: list[str]) -> None:
+    """Generic function to save dataframe to database with conflict resolution."""
+    if df.empty:
+        return
+
+    df_clean = _prepare_dataframe_for_insert(df)
+
+    columns = list(df_clean.columns)
+
+    # PostgreSQL: ON CONFLICT (columns) DO UPDATE SET ...
+    cols_str = ", ".join(columns)
+    placeholders = ", ".join([f":{col}" for col in columns])
+    conflict_str = ", ".join(conflict_columns)
+    update_pairs = ", ".join([f"{col} = EXCLUDED.{col}" for col in columns])
+
+    query_str = f"""
+        INSERT INTO {table_name} ({cols_str})
+        VALUES ({placeholders})
+        ON CONFLICT ({conflict_str}) DO UPDATE SET {update_pairs}
+    """
+
+    with database.session() as session:
+        for _, row in df_clean.iterrows():
+            params = {str(k): v for k, v in row.to_dict().items()}
+            session.execute(text(query_str), params)
+        session.commit()
+
+
 def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
     """Save advanced power forecast predictions to database."""
-    DBGateway.insert_update_df(
+    upsert_df(
         df=df,
         table_name="data_lake.advanced_power_forecast_data",
         conflict_columns=["asset_id", "prediction_date", "available_date"],

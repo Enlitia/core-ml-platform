@@ -58,7 +58,6 @@ def predict_one_asset(
         "prediction_date",
         "asset_id",
         "model_name",
-        "providers",
         "model_params",
         "prediction",
     ]
@@ -86,7 +85,6 @@ def predict_one_asset(
             "prediction_date": X.index.values,
             "asset_id": asset_id,
             "model_name": context.model_name,
-            "providers": str(providers),
             "model_params": [params] * len(predictions),
             "prediction": predictions,
         },

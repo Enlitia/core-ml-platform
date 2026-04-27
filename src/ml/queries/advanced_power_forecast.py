@@ -3,15 +3,10 @@ from datetime import datetime
 import pandas as pd
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase
 from toolkit.data.query import Query
 from toolkit.database import database
 
-
-class Base(DeclarativeBase):
-    """Base class for ORM models."""
-
-    pass
+from .base import Base
 
 
 class AdvancedPowerForecastData(Base):
@@ -33,7 +28,6 @@ class AdvancedPowerForecastData(Base):
     model_name = Column(String, nullable=False, index=True)
     available_date = Column(DateTime, nullable=False, index=True)
     prediction_date = Column(DateTime, nullable=False, index=True)
-    providers = Column(String, nullable=True)
     model_params = Column(JSONB, nullable=True)
     prediction = Column(Float, nullable=False)
     created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
@@ -150,7 +144,6 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
         - model_name: str (e.g., 'positive_linear', 'xgboost')
         - available_date: datetime
         - prediction_date: datetime
-        - providers: str (JSON string)
         - model_params: dict (will be stored as JSONB)
         - prediction: float
     """
@@ -165,7 +158,6 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
                 model_name=str(row["model_name"]),
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
-                providers=str(row["providers"]) if pd.notna(row["providers"]) else None,
                 model_params=row["model_params"] if pd.notna(row["model_params"]) else None,
                 prediction=float(row["prediction"]),
             )

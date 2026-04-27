@@ -103,10 +103,6 @@ def train_one_asset(data: pd.DataFrame, asset_id: int, context: Context) -> None
 
     model.fit(X_train, y_train)
 
-    # Log feature importance
-    feature_weights = model.get_feature_weights()
-    context.logger.info(f"Asset {asset_id} - Feature importance (% contribution): {feature_weights}")
-
     metrics = model.evaluate(X_test, y_test)
     context.logger.info(f"Asset {asset_id} - Metrics: {metrics}")
 

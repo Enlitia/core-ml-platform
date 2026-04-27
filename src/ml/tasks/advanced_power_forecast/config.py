@@ -43,3 +43,6 @@ class AdvancedPowerForecastConfig(BaseTaskConfig):
         "mae": {"max": 10_000.0},
         "rmse": {"max": 15_000.0},
     }
+
+    # Model Selection
+    model_selection_metric: str = "rmse"  # Primary metric for comparing and selecting models

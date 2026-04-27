@@ -23,12 +23,6 @@ class Settings(BaseSettings):
         ),
     }
 
-    power_forecast_table: str = "data_lake.power_forecast_data"
-    power_real_table: str = "data_warehouse.farm_data_power_real"
-    asset_table: str = "data_lake.asset"
-    asset_type_table: str = "data_lake.asset_type"
-    advanced_power_forecast_table: str = "data_lake.advanced_power_forecast_data"
-
     # Nomad Configuration
     nomad_host: str = "192.168.60.18"
 

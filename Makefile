@@ -23,6 +23,7 @@ clean: pyc-clean rm-venv-clean py-cache-clean ## Cleans the environment
 
 # DEV-SETUP ---------------------------------------------------------------------------------------
 install: ## Install dependencies and set up pre-commit hooks
+	poetry env use python3.12
 	poetry install
 	$(RUN_COMMAND) pre-commit install
 	$(RUN_COMMAND) pre-commit install --hook-type commit-msg

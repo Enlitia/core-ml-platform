@@ -1,18 +1,13 @@
 import pandas as pd
 import typer
 
-from ml.common.assets import (convert_input_from_df_to_dict,
-                              select_only_valid_asset_ids)
-from ml.common.queries import (fetch_power_forecast_data_for_train,
-                               fetch_power_real_data_for_train)
+from ml.common.assets import convert_input_from_df_to_dict, select_only_valid_asset_ids
 from ml.common.split_data import split_data_by_day
-from ml.common.validations import (validate_inputs_training,
-                                   validate_model_quality,
-                                   validate_out_of_range)
+from ml.common.validations import validate_inputs_training, validate_model_quality, validate_out_of_range
 from ml.context import Context, get_context
 from ml.models import BaseModel, get_model
-from ml.tasks.advanced_power_forecast.utils.preprocess import \
-    preprocess_power_forecast_data
+from ml.queries.advanced_power_forecast import fetch_power_forecast_data_for_train, fetch_power_real_data_for_train
+from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
 
@@ -74,16 +69,20 @@ def save_model(
     asset_id: int,
     X: pd.DataFrame,
     metrics: dict[str, float],
+    model_params: dict | None = None,
 ) -> None:
     """Save trained model to MLflow Model Registry."""
     providers: list[str] = X.columns.tolist()
     input_example: pd.DataFrame = X.head(1)
+
+    log_params = {"providers": providers, **(model_params or {})}
+
     context.mlflow_gateway.save_model(
         model=model,
         input_example=input_example,
         asset_id=asset_id,
         metrics=metrics,
-        log_params={"providers": providers},
+        log_params=log_params,
     )
 
 
@@ -108,16 +107,12 @@ def train_one_asset(data: pd.DataFrame, asset_id: int, context: Context) -> None
 
     model.fit(X_train, y_train)
 
-    # Log feature importance
-    feature_weights = model.get_feature_weights()
-    context.logger.info(f"Asset {asset_id} - Feature importance (% contribution): {feature_weights}")
-
     metrics = model.evaluate(X_test, y_test)
     context.logger.info(f"Asset {asset_id} - Metrics: {metrics}")
 
     validate_model_quality(metrics, context.task_config.model_quality_thresholds, asset_id)
 
-    save_model(model, context, asset_id, X, metrics)
+    save_model(model, context, asset_id, X, metrics, model_params)
     context.logger.info(f"Model saved for asset {asset_id}")
 
 
@@ -127,7 +122,7 @@ def train(
     task_name: str = "advanced_power_forecast",
     model_name: str | None = None,
 ) -> None:
-    # Context: MLflow, Logger, Settings
+    # Context: Model Name, Task Config, Logger, MLflow Gateway
     context = get_context(task_name=task_name, model_name=model_name)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)

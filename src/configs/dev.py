@@ -1,17 +1,24 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING
 from urllib.parse import quote_plus
 
 from pydantic_settings import BaseSettings
+
+if TYPE_CHECKING:
+    from config import ClientConfig  # type: ignore
 
 # Ensure SM_SETTINGS_MODULE is set when this module is imported
 if not os.getenv("SM_SETTINGS_MODULE"):
     os.environ["SM_SETTINGS_MODULE"] = "dev"
 
 
-def get_client_config():
+def get_client_config() -> ClientConfig | None:
     """Get client configuration if available."""
     try:
         from config import ClientConfig  # type: ignore
+
         return ClientConfig()
     except ImportError:
         return None
@@ -40,12 +47,6 @@ class Settings(BaseSettings):
             )
         ),
     }
-
-    power_forecast_table: str = "data_lake.power_forecast_data"
-    power_real_table: str = "data_warehouse.farm_data_power_real"
-    asset_table: str = "data_lake.asset"
-    asset_type_table: str = "data_lake.asset_type"
-    advanced_power_forecast_table: str = "data_lake.advanced_power_forecast_data"
 
     # Nomad Configuration
     nomad_host: str = "192.168.60.18"

@@ -5,11 +5,11 @@ toolkit.configuration.settings throughout the codebase. This Context only
 manages task-specific config and utilities.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Any
 
-from ml.infrastructure.logger import get_logger
+from toolkit.logging import StructuredLogger, get_logger
+
 from ml.infrastructure.ml_flow import MLflowGateway
 
 
@@ -26,7 +26,7 @@ class Context:
 
     model_name: str  # Active model name (resolved from CLI or config default)
     task_config: Any  # Task-specific ML parameters (training_interval, etc.)
-    logger: logging.Logger  # Logger instance for this task
+    logger: StructuredLogger  # Logger instance for this task
     mlflow_gateway: MLflowGateway  # MLflow interface for model storage
 
 
@@ -50,19 +50,20 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
     task_config = get_task_config(task_name)
 
     # Resolve model name (CLI override or config default)
-    model_name = model_name or task_config.default_model_name
+    resolved_model_name = model_name or task_config.default_model_name
 
     # Validate model is available for this task
-    if model_name not in task_config.available_models:
+    if resolved_model_name not in task_config.available_models:
         raise ValueError(
-            f"Invalid model '{model_name}' for task '{task_name}'. " f"Available: {task_config.available_models}"
+            f"Invalid model '{resolved_model_name}' for task '{task_name}'. "
+            f"Available: {task_config.available_models}"
         )
 
     logger = get_logger(task_config.task_name)
     mlflow_gateway = MLflowGateway(task_config.task_name)
 
     return Context(
-        model_name=model_name,
+        model_name=resolved_model_name,
         task_config=task_config,
         logger=logger,
         mlflow_gateway=mlflow_gateway,

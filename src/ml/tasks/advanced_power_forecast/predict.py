@@ -3,16 +3,15 @@ from datetime import datetime
 import pandas as pd
 import typer
 
-from ml.common.assets import (convert_input_from_df_to_dict,
-                              select_only_valid_asset_ids)
+from ml.common.assets import convert_input_from_df_to_dict, select_only_valid_asset_ids
 from ml.common.dates import get_dates
-from ml.common.queries import (fetch_power_forecast_data_for_prediction,
-                               save_advanced_power_forecast_predictions)
-from ml.common.validations import (validate_inputs_prediction,
-                                   validate_not_empty)
+from ml.common.validations import validate_inputs_prediction, validate_not_empty
 from ml.context import Context, get_context
-from ml.tasks.advanced_power_forecast.utils.preprocess import \
-    preprocess_power_forecast_data
+from ml.queries.advanced_power_forecast import (
+    fetch_power_forecast_data_for_prediction,
+    save_advanced_power_forecast_predictions,
+)
+from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
 
@@ -35,9 +34,11 @@ def get_prediction_inputs_all_assets(
     return dict_input_all_assets
 
 
-def preprocess_prediction_data(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_prediction_data(df: pd.DataFrame, providers: list[str]) -> pd.DataFrame:
     """Preprocess power forecast data for prediction."""
     X = df.drop(columns=["asset_id"]).copy()
+
+    X = X[providers]
 
     # Fillna power with row avg, then with 0 if row avg is NaN
     X = X.apply(lambda row: row.fillna(row.mean()), axis=1)
@@ -56,22 +57,25 @@ def predict_one_asset(
         "available_date",
         "prediction_date",
         "asset_id",
-        "providers",
-        "prediction",
+        "model_name",
+        "model_params",
+        "forecast_value",
+        "upper_limit",
+        "lower_limit",
     ]
 
     validate_not_empty(data, asset_id)
 
     context.logger.info(f"Predicting for asset {asset_id} with {len(data)} timestamps")
 
-    # Preprocess
-    X = preprocess_prediction_data(data)
-
-    validate_inputs_prediction(X, asset_id)
-
     # Get Model
     model, params = context.mlflow_gateway.load_model(context.model_name, asset_id)
     providers = params.get("providers", [])
+
+    # Preprocess
+    X = preprocess_prediction_data(data, providers)
+
+    validate_inputs_prediction(X, asset_id)
 
     # Generate predictions
     predictions = model.predict(X)
@@ -82,8 +86,11 @@ def predict_one_asset(
             "available_date": start_date,
             "prediction_date": X.index.values,
             "asset_id": asset_id,
-            "providers": str(providers),
-            "prediction": predictions,
+            "model_name": context.model_name,
+            "model_params": [params] * len(predictions),
+            "forecast_value": predictions,
+            "upper_limit": [None] * len(predictions),
+            "lower_limit": [None] * len(predictions),
         },
         columns=output_cols,
     )
@@ -108,6 +115,7 @@ def predict(
     Returns:
         DataFrame with timestamps and predictions
     """
+    # Context: Model Name, Task Config, Logger, MLflow Gateway
     context = get_context(task_name=task_name, model_name=model_name)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)

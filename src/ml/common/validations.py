@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def validate_not_empty(df: pd.DataFrame, asset_id) -> None:
+def validate_not_empty(df: pd.DataFrame, asset_id: int) -> None:
     """
     Validate that dataframe is not empty.
 
@@ -11,7 +11,7 @@ def validate_not_empty(df: pd.DataFrame, asset_id) -> None:
         raise ValueError(f"No data available for asset {asset_id}")
 
 
-def validate_negative_values(df: pd.DataFrame, column: str, asset_id) -> None:
+def validate_negative_values(df: pd.DataFrame, column: str, asset_id: int) -> None:
     """
     Check if column has negative values.
 
@@ -22,7 +22,7 @@ def validate_negative_values(df: pd.DataFrame, column: str, asset_id) -> None:
         raise ValueError(f"{column}: found {count} negative values for asset {asset_id}")
 
 
-def validate_null_values(df: pd.DataFrame, column: str, asset_id) -> None:
+def validate_null_values(df: pd.DataFrame, column: str, asset_id: int) -> None:
     """
     Check if column has null values.
 
@@ -33,7 +33,7 @@ def validate_null_values(df: pd.DataFrame, column: str, asset_id) -> None:
         raise ValueError(f"{column}: found {count} null values for asset {asset_id}")
 
 
-def validate_out_of_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, asset_id) -> None:
+def validate_out_of_range(df: pd.DataFrame, column: str, min_val: float, max_val: float, asset_id: int) -> None:
     """
     Check if column has values outside specified range.
 
@@ -45,7 +45,7 @@ def validate_out_of_range(df: pd.DataFrame, column: str, min_val: float, max_val
         raise ValueError(f"{column}: found {count} values outside range [{min_val}, {max_val}] for asset {asset_id}")
 
 
-def validate_inputs_training(X: pd.DataFrame, y: pd.Series, min_size_train: int, asset_id) -> None:
+def validate_inputs_training(X: pd.DataFrame, y: pd.Series, min_size_train: int, asset_id: int) -> None:
     """Validate model inputs."""
     if X.empty:
         raise ValueError(f"Training: Input features (X) cannot be empty for asset {asset_id}.")

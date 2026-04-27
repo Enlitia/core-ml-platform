@@ -16,19 +16,32 @@ Usage:
 """
 
 import os
-from datetime import datetime
-from typing import Optional
+from typing import Annotated
 
 import typer
+from toolkit.cli import StartDate
+from toolkit.logging import configure_logging
 
 from ml.tasks import TASK_CONFIG_REGISTRY, get_task_handler
 
+# ---------------------------------------------------------------------------
+# CLI option types
+# ---------------------------------------------------------------------------
 
-def discover_client_name() -> Optional[str]:
+TaskName = Annotated[str, typer.Option("--task", help="Task name (e.g., advanced_power_forecast)")]
+ModelName = Annotated[
+    str | None, typer.Option("--model", help="Model name (optional, uses task default if not provided)")
+]
+AssetIdsStr = Annotated[str, typer.Option("--asset-ids", help="Asset IDs: 'all', single ID, or comma-separated IDs")]
+
+
+def discover_client_name() -> str | None:
     """Get client name from config.py."""
     try:
         from config import ClientConfig  # type: ignore
-        return ClientConfig().client_name
+
+        client_name: str = ClientConfig().client_name
+        return client_name
     except (ImportError, AttributeError):
         return None
 
@@ -39,9 +52,9 @@ def validate_environment() -> None:
         discovered_client = discover_client_name()
         if discovered_client:
             os.environ["CLIENT_NAME"] = discovered_client
-    
+
     if not os.getenv("CLIENT_NAME"):
-        typer.echo(f"❌ Missing CLIENT_NAME", err=True)
+        typer.echo("❌ Missing CLIENT_NAME", err=True)
         typer.echo("Create a config.py with ClientConfig class containing client_name", err=True)
         raise typer.Exit(code=1)
 
@@ -66,9 +79,9 @@ app = typer.Typer(
 
 @app.command(name="train")
 def train_task(
-    task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
-    model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
-    asset_ids: str = typer.Option("all", help="Asset IDs: 'all', single ID, or comma-separated IDs"),
+    task: TaskName,
+    model: ModelName = None,
+    asset_ids: AssetIdsStr = "all",
 ) -> None:
     """Train a model for a specific task."""
     validate_environment()
@@ -91,10 +104,10 @@ def train_task(
 
 @app.command(name="predict")
 def predict_task(
-    task: str = typer.Option(..., help="Task name (e.g., advanced_power_forecast)"),
-    model: Optional[str] = typer.Option(None, help="Model name (optional, uses task default if not provided)"),
-    asset_ids: str = typer.Option("all", help="Asset IDs: 'all', single ID, or comma-separated IDs"),
-    start_date: Optional[str] = typer.Option(None, help="Start date (ISO format, default: now)"),
+    task: TaskName,
+    model: ModelName = None,
+    asset_ids: AssetIdsStr = "all",
+    start_date: StartDate = None,
 ) -> None:
     """Generate predictions for a specific task."""
     validate_environment()
@@ -104,21 +117,12 @@ def predict_task(
         typer.echo(f"❌ Unknown task '{task}'. Use 'ml list-tasks' to see available tasks.", err=True)
         raise typer.Exit(code=1)
 
-    # Parse start_date if provided
-    parsed_start_date = None
-    if start_date:
-        try:
-            parsed_start_date = datetime.fromisoformat(start_date)
-        except ValueError:
-            typer.echo(f"❌ Invalid date format '{start_date}'. Use ISO format (e.g., 2026-04-16T10:30:00)", err=True)
-            raise typer.Exit(code=1)
-
     typer.echo(f"🚀 Starting predictions for task '{task}' with asset_ids={asset_ids}")
 
     # Get and run the task's predict function from registry
     try:
         predict_func = get_task_handler(task, "predict")
-        predict_func(asset_ids=asset_ids, task_name=task, model_name=model, start_date=parsed_start_date)
+        predict_func(asset_ids=asset_ids, task_name=task, model_name=model, start_date=start_date)
     except KeyError as e:
         typer.echo(f"❌ {e}", err=True)
         raise typer.Exit(code=1)
@@ -166,7 +170,15 @@ def callback() -> None:
     Run ML tasks (train/predict) for different clients and environments.
     Each client has its own database and configuration.
     """
-    pass
+    # Configure logging once at startup
+    env = os.getenv("ENV", "dev")
+    format_type = "json" if env == "production" else "console"
+
+    configure_logging(
+        project="core-ml-platform",
+        service=os.getenv("CLIENT_NAME", "ml-tasks"),
+        config={"level": "INFO", "format_type": format_type},
+    )
 
 
 if __name__ == "__main__":

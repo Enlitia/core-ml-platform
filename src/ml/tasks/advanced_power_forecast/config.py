@@ -19,8 +19,9 @@ class AdvancedPowerForecastConfig(BaseTaskConfig):
 
     # Model-specific parameters (optional overrides for each model)
     model_params: dict[str, dict] = {
-        # "xgboost": {"n_estimators": 200, "max_depth": 8},  # Example
-        # "random_forest": {"n_estimators": 150},  # Example
+        "positive_linear": {},
+        "xgboost": {},
+        "random_forest": {},
     }
 
     # Training parameters

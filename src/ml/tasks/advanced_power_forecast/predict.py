@@ -59,7 +59,9 @@ def predict_one_asset(
         "asset_id",
         "model_name",
         "model_params",
-        "prediction",
+        "forecast_value",
+        "upper_limit",
+        "lower_limit",
     ]
 
     validate_not_empty(data, asset_id)
@@ -86,7 +88,9 @@ def predict_one_asset(
             "asset_id": asset_id,
             "model_name": context.model_name,
             "model_params": [params] * len(predictions),
-            "prediction": predictions,
+            "forecast_value": predictions,
+            "upper_limit": [None] * len(predictions),
+            "lower_limit": [None] * len(predictions),
         },
         columns=output_cols,
     )
@@ -111,6 +115,7 @@ def predict(
     Returns:
         DataFrame with timestamps and predictions
     """
+    # Context: Model Name, Task Config, Logger, MLflow Gateway
     context = get_context(task_name=task_name, model_name=model_name)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)

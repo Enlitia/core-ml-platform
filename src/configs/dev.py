@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from typing import TYPE_CHECKING
 from urllib.parse import quote_plus
@@ -12,7 +14,7 @@ if not os.getenv("SM_SETTINGS_MODULE"):
     os.environ["SM_SETTINGS_MODULE"] = "dev"
 
 
-def get_client_config() -> "ClientConfig | None":
+def get_client_config() -> ClientConfig | None:
     """Get client configuration if available."""
     try:
         from config import ClientConfig  # type: ignore

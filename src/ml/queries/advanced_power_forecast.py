@@ -29,7 +29,9 @@ class AdvancedPowerForecastData(Base):
     available_date = Column(DateTime, nullable=False, index=True)
     prediction_date = Column(DateTime, nullable=False, index=True)
     model_params = Column(JSONB, nullable=True)
-    prediction = Column(Float, nullable=False)
+    forecast_value = Column(Float, nullable=False)
+    upper_limit = Column(Float, nullable=True)
+    lower_limit = Column(Float, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
     updated_at = Column(DateTime, nullable=True, server_default="CURRENT_TIMESTAMP")
 
@@ -145,7 +147,9 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
         - available_date: datetime
         - prediction_date: datetime
         - model_params: dict (will be stored as JSONB)
-        - prediction: float
+        - forecast_value: float
+        - upper_limit: float (optional)
+        - lower_limit: float (optional)
     """
     if df.empty:
         return
@@ -159,7 +163,9 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
                 model_params=row["model_params"] if pd.notna(row["model_params"]) else None,
-                prediction=float(row["prediction"]),
+                forecast_value=float(row["forecast_value"]),
+                upper_limit=float(row["upper_limit"]) if pd.notna(row["upper_limit"]) else None,
+                lower_limit=float(row["lower_limit"]) if pd.notna(row["lower_limit"]) else None,
             )
             session.merge(prediction)
 

@@ -122,7 +122,7 @@ def train(
     task_name: str = "advanced_power_forecast",
     model_name: str | None = None,
 ) -> None:
-    # Context: MLflow, Logger, Settings
+    # Context: Model Name, Task Config, Logger, MLflow Gateway
     context = get_context(task_name=task_name, model_name=model_name)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)

@@ -69,16 +69,20 @@ def save_model(
     asset_id: int,
     X: pd.DataFrame,
     metrics: dict[str, float],
+    model_params: dict | None = None,
 ) -> None:
     """Save trained model to MLflow Model Registry."""
     providers: list[str] = X.columns.tolist()
     input_example: pd.DataFrame = X.head(1)
+
+    log_params = {"providers": providers, **(model_params or {})}
+
     context.mlflow_gateway.save_model(
         model=model,
         input_example=input_example,
         asset_id=asset_id,
         metrics=metrics,
-        log_params={"providers": providers},
+        log_params=log_params,
     )
 
 
@@ -108,7 +112,7 @@ def train_one_asset(data: pd.DataFrame, asset_id: int, context: Context) -> None
 
     validate_model_quality(metrics, context.task_config.model_quality_thresholds, asset_id)
 
-    save_model(model, context, asset_id, X, metrics)
+    save_model(model, context, asset_id, X, metrics, model_params)
     context.logger.info(f"Model saved for asset {asset_id}")
 
 

@@ -1,4 +1,8 @@
-RUN_COMMAND = poetry run
+.DEFAULT_GOAL := help
+
+RUN_COMMAND ?= poetry run
+
+.SILENT:
 
 # Docker Configuration
 PROJECT_NAME = service-core-ml
@@ -14,61 +18,36 @@ pyc-clean: ## Remove python byte code files
 	find . -iname "*.pyc" -delete
 
 rm-venv-clean: ## Remove the virtual environment
-	poetry env remove python || true
+	-poetry env remove python
 
-py-cache-clean: ## Remove all .pyc and .pyo files as well as __pycache__ directories
-	find . | grep -E "(/__pycache__$$|\.pyc$$|\.pyo$$)" | xargs rm -rf
-
-clean: pyc-clean rm-venv-clean py-cache-clean ## Cleans the environment
+clean: pyc-clean rm-venv-clean ## Cleans the environment
 
 # DEV-SETUP ---------------------------------------------------------------------------------------
-install: ## Install dependencies and set up pre-commit hooks
-	poetry env use python3.12
-	poetry install
-	$(RUN_COMMAND) pre-commit install
-	$(RUN_COMMAND) pre-commit install --hook-type commit-msg
-
 hooks:  ## Installs git hooks
 	$(RUN_COMMAND) pre-commit install
 	$(RUN_COMMAND) pre-commit install --hook-type commit-msg
 
-lock: ## Update poetry lock file
-	poetry lock
-
-deps: lock ## Installs all project package dependencies
+deps: ## Installs all project package dependencies
 	poetry install
-
-repo: ## Setup python packages private repo (not used in this project)
-	@echo "Private repo setup not needed for this project"
 
 dev-setup: deps hooks ## Sets up the development environment
 
 # TESTS  ------------------------------------------------------------------------------------------
-
 test: ## Run all tests (always passes if no tests)
 	@echo "No tests to run. Passing."
 
 # FORMAT ------------------------------------------------------------------------------------------
 format:  ## Formats the code
-	$(RUN_COMMAND) black -l 120 ./src
-	$(RUN_COMMAND) isort ./src
+	$(RUN_COMMAND) ruff format ./src
 
-# CODE ANALYSIS ---------------------------------------------------------------------------------
+# STATIC ANALYSES ---------------------------------------------------------------------------------
 type-analysis: ## Checks the code regarding types
 	$(RUN_COMMAND) mypy ./src
 
 lint-analysis:  ## Lints the code
-	$(RUN_COMMAND) ruff ./src
+	$(RUN_COMMAND) ruff check ./src --fix
 
-lint-fix:
-	$(RUN_COMMAND) ruff --fix ./src
-
-static-analysis: type-analysis lint-analysis ## Checks the code for errors and inconsistency
-
-check: format lint-fix static-analysis test ## Run all checks before committing
-
-# ALL ---------------------------------------------------------------------------------------------
-poetry-all: clean dev-setup format static-analysis  ## Runs all development flow steps
+static-analysis: lint-analysis type-analysis ## Checks the code for errors and inconsistency
 
 # DOCKER ------------------------------------------------------------------------------------------
 docker-build:

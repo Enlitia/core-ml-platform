@@ -1,0 +1,3 @@
+[submodule "core-data-platform"]
+	path = core-data-platform
+	url = git@github.com:Enlitia/core-data-platform.git

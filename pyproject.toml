@@ -41,7 +41,7 @@ disallow_untyped_defs = true
 ignore_missing_imports = false
 namespace_packages = true
 explicit_package_bases = true
-mypy_path = "src"
+mypy_path = "src:core-data-platform/models"
 
 [[tool.mypy.overrides]]
 module = "toolkit.*"

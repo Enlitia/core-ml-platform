@@ -1,38 +1,17 @@
+import sys
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from toolkit.data.query import Query
 from toolkit.database import database
 
-from .base import Base
+# Add core-data-platform models to path
+_core_data_platform_models = Path(__file__).parent.parent.parent.parent / "core-data-platform" / "models"
+if str(_core_data_platform_models) not in sys.path:
+    sys.path.insert(0, str(_core_data_platform_models))
 
-
-class AdvancedPowerForecastData(Base):
-    """Model for advanced power forecast predictions."""
-
-    __tablename__ = "advanced_power_forecast_data"
-    __table_args__ = (
-        UniqueConstraint(
-            "asset_id",
-            "prediction_date",
-            "available_date",
-            name="uq_advanced_power_forecast_data",
-        ),
-        {"schema": "machine_learning"},
-    )
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    asset_id = Column(Integer, ForeignKey("data_lake.asset.id"), nullable=False, index=True)
-    model_name = Column(String, nullable=False, index=True)
-    available_date = Column(DateTime, nullable=False, index=True)
-    prediction_date = Column(DateTime, nullable=False, index=True)
-    forecast_value = Column(Float, nullable=False)
-    lower_limit = Column(Float, nullable=True)
-    upper_limit = Column(Float, nullable=True)
-    created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
-    updated_at = Column(DateTime, nullable=True, server_default="CURRENT_TIMESTAMP")
-
+from base_models.machine_learning import AdvancedPowerForecastData
 
 # Train Advanced Power Forecast
 

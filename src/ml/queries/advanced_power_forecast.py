@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pandas as pd
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
 from toolkit.data.query import Query
 from toolkit.database import database
 
@@ -28,7 +27,6 @@ class AdvancedPowerForecastData(Base):
     model_name = Column(String, nullable=False, index=True)
     available_date = Column(DateTime, nullable=False, index=True)
     prediction_date = Column(DateTime, nullable=False, index=True)
-    model_params = Column(JSONB, nullable=True)
     forecast_value = Column(Float, nullable=False)
     upper_limit = Column(Float, nullable=True)
     lower_limit = Column(Float, nullable=True)
@@ -146,7 +144,6 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
         - model_name: str (e.g., 'positive_linear', 'xgboost')
         - available_date: datetime
         - prediction_date: datetime
-        - model_params: dict (will be stored as JSONB)
         - forecast_value: float
         - upper_limit: float (optional)
         - lower_limit: float (optional)
@@ -162,7 +159,6 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
                 model_name=str(row["model_name"]),
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
-                model_params=row["model_params"] if pd.notna(row["model_params"]) else None,
                 forecast_value=float(row["forecast_value"]),
                 upper_limit=float(row["upper_limit"]) if pd.notna(row["upper_limit"]) else None,
                 lower_limit=float(row["lower_limit"]) if pd.notna(row["lower_limit"]) else None,

@@ -59,8 +59,8 @@ def predict_one_asset(
         "asset_id",
         "model_name",
         "forecast_value",
-        "upper_limit",
         "lower_limit",
+        "upper_limit",
     ]
 
     validate_not_empty(data, asset_id)
@@ -87,8 +87,8 @@ def predict_one_asset(
             "asset_id": asset_id,
             "model_name": context.model_name,
             "forecast_value": predictions,
-            "upper_limit": [None] * len(predictions),
             "lower_limit": [None] * len(predictions),
+            "upper_limit": [None] * len(predictions),
         },
         columns=output_cols,
     )

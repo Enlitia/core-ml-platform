@@ -28,8 +28,8 @@ class AdvancedPowerForecastData(Base):
     available_date = Column(DateTime, nullable=False, index=True)
     prediction_date = Column(DateTime, nullable=False, index=True)
     forecast_value = Column(Float, nullable=False)
-    upper_limit = Column(Float, nullable=True)
     lower_limit = Column(Float, nullable=True)
+    upper_limit = Column(Float, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
     updated_at = Column(DateTime, nullable=True, server_default="CURRENT_TIMESTAMP")
 
@@ -145,8 +145,8 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
         - available_date: datetime
         - prediction_date: datetime
         - forecast_value: float
-        - upper_limit: float (optional)
         - lower_limit: float (optional)
+        - upper_limit: float (optional)
     """
     if df.empty:
         return
@@ -160,8 +160,8 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
                 forecast_value=float(row["forecast_value"]),
-                upper_limit=float(row["upper_limit"]) if pd.notna(row["upper_limit"]) else None,
                 lower_limit=float(row["lower_limit"]) if pd.notna(row["lower_limit"]) else None,
+                upper_limit=float(row["upper_limit"]) if pd.notna(row["upper_limit"]) else None,
             )
             session.merge(prediction)
 

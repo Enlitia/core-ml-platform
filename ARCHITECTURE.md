@@ -133,7 +133,7 @@ CLIENT_REGISTRY (clients/__init__.py)
 └── Example:
     {
       "erg": ClientConfig(
-        db_user="...", 
+        db_user="...",
         db_password="...",
         tasks={"advanced_power_forecast": NomadTaskConfig(...)}
       )

@@ -55,8 +55,7 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
     # Validate model is available for this task
     if resolved_model_name not in task_config.available_models:
         raise ValueError(
-            f"Invalid model '{resolved_model_name}' for task '{task_name}'. "
-            f"Available: {task_config.available_models}"
+            f"Invalid model '{resolved_model_name}' for task '{task_name}'. Available: {task_config.available_models}"
         )
 
     logger = get_logger(task_config.task_name)

@@ -9,7 +9,7 @@ A machine learning service that trains and predicts forecasts for multiple clien
 The service uses **registry patterns** for consistent configuration:
 
 - **`MODEL_REGISTRY`** (`src/ml/models/__init__.py`) - Available ML models
-- **`TASK_CONFIG_REGISTRY`** (`src/ml/tasks/__init__.py`) - Task configurations and parameters  
+- **`TASK_CONFIG_REGISTRY`** (`src/ml/tasks/__init__.py`) - Task configurations and parameters
 - **`CLIENT_REGISTRY`** (`src/clients/__init__.py`) - Client configs with database credentials and tasks
 
 All registries follow the same pattern: configuration classes registered in a central dict with singular getter functions (`get_model()`, `get_task_config()`, `get_client()`).
@@ -37,14 +37,14 @@ One model can be used by many tasks, or you can create task-specific models.
 1. **Add client configuration** in `src/clients/<client_name>.py`:
    ```python
    from clients.base import ClientConfig, NomadTaskConfig
-   
+
    class NewClientConfig(ClientConfig):
        """Configuration for New Client."""
-       
+
        client_name: str = "new_client"
        db_user: str = "db_user"
        db_password: str = "db_password"
-       
+
        tasks: dict[str, NomadTaskConfig] = {
            "advanced_power_forecast": NomadTaskConfig(
                train_cron="0 4 * * *",      # Daily at 4am (None = use default)
@@ -63,7 +63,7 @@ One model can be used by many tasks, or you can create task-specific models.
    from clients.base import ClientConfig
    from clients.erg import ErgClientConfig
    from clients.new_client import NewClientConfig
-   
+
    CLIENT_REGISTRY: dict[str, ClientConfig] = {
        "erg": ErgClientConfig(),
        "new_client": NewClientConfig(),
@@ -98,7 +98,7 @@ Models define **how** to perform ML operations (fit, predict, evaluate).
 2. **Register the model** in `src/ml/models/__init__.py`:
    ```python
    from .your_model import YourModel
-   
+
    MODEL_REGISTRY = {
        "positive_linear": PositiveLinearModel,
        "xgboost": XGBoostModel,
@@ -133,33 +133,33 @@ Tasks define **what** business problem to solve using models.
 2. **Create task configuration** in `src/ml/tasks/<your_task_name>/config.py`:
    ```python
    from ml.tasks.base import BaseTaskConfig
-   
+
    class YourTaskConfig(BaseTaskConfig):
        """Configuration for Your Task."""
-       
+
        task_name: str = "your_task_name"  # Must match folder name
-       
+
        # Model Configuration
        default_model_name: str = "positive_linear"  # Default model
        available_models: list[str] = ["positive_linear", "xgboost", "random_forest"]
        model_params: dict[str, dict] = {}  # Optional model-specific params
-       
+
        # Add task-specific parameters
        training_interval: str = "1 year"
        prediction_days: int = 15
    ```
-   
+
    **Tip**: Copy from `src/ml/tasks/advanced_power_forecast/config.py` and adapt.
 
 3. **Register the task config** in `src/ml/tasks/__init__.py`:
    ```python
    from ml.tasks.your_task_name.config import YourTaskConfig
-   
+
    TASK_CONFIG_REGISTRY = {
        "advanced_power_forecast": AdvancedPowerForecastConfig(),
        "your_task_name": YourTaskConfig(),
    }
-   
+
    TASK_HANDLERS = {
        "your_task_name": {
            "train": your_task_train,
@@ -213,7 +213,7 @@ class YourTaskConfig(BaseTaskConfig):
     # Model Configuration
     default_model_name: str = "positive_linear"
     available_models: list[str] = ["positive_linear", "xgboost", "random_forest"]
-    
+
     # Custom parameters per model
     model_params: dict[str, dict] = {
         "xgboost": {"n_estimators": 200, "max_depth": 8, "learning_rate": 0.05},

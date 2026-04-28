@@ -127,7 +127,7 @@ def train(
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)
     context.logger.info(
-        f"Starting training for {len(list_asset_ids)} asset(s): {list_asset_ids} " f"using model '{context.model_name}'"
+        f"Starting training for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_name}'"
     )
 
     dict_inputs_all_assets = get_training_inputs_all_assets(list_asset_ids, context)

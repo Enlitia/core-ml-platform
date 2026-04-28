@@ -125,8 +125,7 @@ def predict(
     )
 
     context.logger.info(
-        f"Starting predictions for {len(list_asset_ids)} asset(s): {list_asset_ids} "
-        f"using model '{context.model_name}'"
+        f"Starting predictions for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_name}'"
     )
 
     dict_inputs_all_assets = get_prediction_inputs_all_assets(list_asset_ids, start_date, end_date, delta_minutes)

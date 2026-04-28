@@ -15,9 +15,9 @@ def fetch_power_forecast_data_for_train(list_asset_ids: list[int], training_inte
             asset_id,
             available_date,
             prediction_date,
-            provider_id, 
+            provider_id,
             forecast_value AS power_forecast
-        FROM 
+        FROM
             data_lake.power_forecast_data
         WHERE available_date > NOW() - INTERVAL ':training_interval'
         ORDER BY 1, 2, 3, 4
@@ -72,12 +72,12 @@ def fetch_power_forecast_data_for_prediction(
             asset_id,
             available_date,
             prediction_date,
-            provider_id, 
+            provider_id,
             forecast_value AS power_forecast,
             MAX(available_date) OVER (PARTITION BY asset_id, prediction_date, provider_id) AS max_available_date
-        FROM 
-            data_lake.power_forecast_data 
-        WHERE 
+        FROM
+            data_lake.power_forecast_data
+        WHERE
             EXTRACT(MINUTE FROM prediction_date) % :delta_minutes = 0
     )
 
@@ -87,9 +87,9 @@ def fetch_power_forecast_data_for_prediction(
         prediction_date,
         provider_id,
         power_forecast
-    FROM 
+    FROM
         forecast_data
-    WHERE 
+    WHERE
         available_date = max_available_date
     """
     query = Query(sql_query)

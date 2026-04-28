@@ -107,8 +107,8 @@ def validate_model_quality(metrics: dict[str, float], thresholds: dict[str, dict
 
         # Check max threshold
         if max_limit is not None and actual_value > max_limit:
-            raise ValueError(f"Asset {asset_id}: {metric_name} {actual_value:.2f} " f"exceeds maximum {max_limit:.2f}")
+            raise ValueError(f"Asset {asset_id}: {metric_name} {actual_value:.2f} exceeds maximum {max_limit:.2f}")
 
         # Check min threshold
         if min_limit is not None and actual_value < min_limit:
-            raise ValueError(f"Asset {asset_id}: {metric_name} {actual_value:.2f} " f"below minimum {min_limit:.2f}")
+            raise ValueError(f"Asset {asset_id}: {metric_name} {actual_value:.2f} below minimum {min_limit:.2f}")

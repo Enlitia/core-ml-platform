@@ -1,17 +1,9 @@
-import sys
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
+from base_models.machine_learning import AdvancedPowerForecastData
 from toolkit.data.query import Query
 from toolkit.database import database
-
-# Add core-data-platform models to path
-_core_data_platform_models = Path(__file__).parent.parent.parent.parent / "core-data-platform" / "models"
-if str(_core_data_platform_models) not in sys.path:
-    sys.path.insert(0, str(_core_data_platform_models))
-
-from base_models.machine_learning import AdvancedPowerForecastData
 
 # Train Advanced Power Forecast
 

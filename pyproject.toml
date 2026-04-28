@@ -10,7 +10,8 @@ authors = ["Enlitia <dev@enlitia.pt>"]
 readme = "README.md"
 packages = [
     {include = "ml", from = "src"},
-    {include = "configs", from = "src"}
+    {include = "configs", from = "src"},
+    {include = "base_models", from = "core-data-platform/models"}
 ]
 
 [tool.poetry.dependencies]

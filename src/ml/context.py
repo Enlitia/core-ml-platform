@@ -25,6 +25,7 @@ class Context:
     """
 
     model_name: str  # Active model name (resolved from CLI or config default)
+    model_type_id: int  # Model type ID from ml_model_type table (for saving predictions)
     task_config: Any  # Task-specific ML parameters (training_interval, etc.)
     logger: StructuredLogger  # Logger instance for this task
     mlflow_gateway: MLflowGateway  # MLflow interface for model storage
@@ -45,6 +46,7 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
         context = get_context("advanced_power_forecast", model_name="xgboost")
     """
     # Import here to avoid circular import
+    from ml.queries.ml_models import get_ml_model_type_id
     from ml.tasks import get_task_config
 
     task_config = get_task_config(task_name)
@@ -58,11 +60,15 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
             f"Invalid model '{resolved_model_name}' for task '{task_name}'. Available: {task_config.available_models}"
         )
 
+    # Get model_type_id from model_name (used when saving predictions)
+    model_type_id = get_ml_model_type_id(resolved_model_name)
+
     logger = get_logger(task_config.task_name)
     mlflow_gateway = MLflowGateway(task_config.task_name)
 
     return Context(
         model_name=resolved_model_name,
+        model_type_id=model_type_id,
         task_config=task_config,
         logger=logger,
         mlflow_gateway=mlflow_gateway,

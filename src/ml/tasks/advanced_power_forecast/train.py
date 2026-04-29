@@ -10,7 +10,6 @@ from ml.queries.advanced_power_forecast import (
     fetch_power_forecast_data_for_train,
     fetch_power_real_data_for_train,
 )
-from ml.queries.ml_models import get_ml_model_id
 from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
@@ -79,10 +78,7 @@ def save_model(
     providers: list[str] = X.columns.tolist()
     input_example: pd.DataFrame = X.head(1)
 
-    # Get model_id from model_name (will be used when saving predictions)
-    model_id = get_ml_model_id(context.model_name)
-
-    log_params = {"model_id": model_id, "providers": providers, **(model_params or {})}
+    log_params = {"providers": providers, **(model_params or {})}
 
     context.mlflow_gateway.save_model(
         model=model,

@@ -113,7 +113,7 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
 
     Expected DataFrame columns:
         - asset_id: int
-        - model_id: int (FK to machine_learning.ml_model.id)
+        - model_type_id: int (FK to machine_learning.ml_model_type.id)
         - available_date: datetime
         - prediction_date: datetime
         - forecast_value: float
@@ -128,7 +128,7 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
             # Create ORM object - merge will INSERT or UPDATE based on primary key
             prediction = AdvancedPowerForecastData(
                 asset_id=int(row["asset_id"]),
-                model_id=int(row["model_id"]),
+                model_type_id=int(row["model_type_id"]),
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
                 forecast_value=float(row["forecast_value"]),

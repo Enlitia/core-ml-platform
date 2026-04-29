@@ -24,26 +24,26 @@ class Context:
     use toolkit.configuration.settings directly.
     """
 
-    model_name: str  # Active model name (resolved from CLI or config default)
+    model_type: str  # Active model type (resolved from CLI or config default)
     model_type_id: int  # Model type ID from ml_model_type table (for saving predictions)
     task_config: Any  # Task-specific ML parameters (training_interval, etc.)
     logger: StructuredLogger  # Logger instance for this task
     mlflow_gateway: MLflowGateway  # MLflow interface for model storage
 
 
-def get_context(task_name: str, model_name: str | None = None) -> Context:
+def get_context(task_name: str, model_type: str | None = None) -> Context:
     """Initialize context for ML task execution.
 
     Args:
         task_name: Name of the task (e.g., 'advanced_power_forecast')
-        model_name: Model name override (optional, uses config default if not provided)
+        model_type: Model type override (optional, uses config default if not provided)
 
     Returns:
-        Context with task config, model name, logger, and MLflow gateway initialized
+        Context with task config, model type, logger, and MLflow gateway initialized
 
     Example:
         context = get_context("advanced_power_forecast")
-        context = get_context("advanced_power_forecast", model_name="xgboost")
+        context = get_context("advanced_power_forecast", model_type="xgboost")
     """
     # Import here to avoid circular import
     from ml.queries.ml_models import get_ml_model_type_id
@@ -51,23 +51,23 @@ def get_context(task_name: str, model_name: str | None = None) -> Context:
 
     task_config = get_task_config(task_name)
 
-    # Resolve model name (CLI override or config default)
-    resolved_model_name = model_name or task_config.default_model_name
+    # Resolve model type (CLI override or config default)
+    resolved_model_type = model_type or task_config.default_model_type
 
     # Validate model is available for this task
-    if resolved_model_name not in task_config.available_models:
+    if resolved_model_type not in task_config.available_models:
         raise ValueError(
-            f"Invalid model '{resolved_model_name}' for task '{task_name}'. Available: {task_config.available_models}"
+            f"Invalid model '{resolved_model_type}' for task '{task_name}'. Available: {task_config.available_models}"
         )
 
-    # Get model_type_id from model_name (used when saving predictions)
-    model_type_id = get_ml_model_type_id(resolved_model_name)
+    # Get model_type_id from model_type (used when saving predictions)
+    model_type_id = get_ml_model_type_id(resolved_model_type)
 
     logger = get_logger(task_config.task_name)
     mlflow_gateway = MLflowGateway(task_config.task_name)
 
     return Context(
-        model_name=resolved_model_name,
+        model_type=resolved_model_type,
         model_type_id=model_type_id,
         task_config=task_config,
         logger=logger,

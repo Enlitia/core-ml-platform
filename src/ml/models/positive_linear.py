@@ -10,7 +10,7 @@ class PositiveLinearModel(BaseModel):
     """Positive LinearRegression for Advanced Power Forecast."""
 
     def __init__(self, params: dict | None = None) -> None:
-        self.model_name = "positive_linear"
+        self.model_type = "positive_linear"
         self.params = params or {}
         self.model = LinearRegression(positive=True)
         self.feature_names_: list[str] = []

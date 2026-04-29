@@ -10,7 +10,7 @@ class RandomForestModel(BaseModel):
     """Random Forest Regressor for Advanced Power Forecast."""
 
     def __init__(self, params: dict | None = None) -> None:
-        self.model_name = "random_forest"
+        self.model_type = "random_forest"
         self.params = params or {}
         self.model = RandomForestRegressor(**self.params)
         self.feature_names_: list[str] = []

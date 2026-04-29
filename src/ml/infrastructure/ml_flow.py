@@ -38,14 +38,14 @@ class MLflowGateway:
         log_params: dict[str, Any] | None = None,
     ) -> None:
         """Save trained model to MLflow Model Registry."""
-        run_name = f"{model.model_name}_client_{self.client_name}"
+        run_name = f"{model.model_type}_client_{self.client_name}"
         if asset_id is not None:
             run_name += f"_asset_{asset_id}"
 
         with mlflow.start_run(run_name=run_name):
             # Tags for metadata/identifiers
             mlflow.set_tag("client_name", self.client_name)
-            mlflow.set_tag("model_name", model.model_name)
+            mlflow.set_tag("model_type", model.model_type)
             if asset_id is not None:
                 mlflow.set_tag("asset_id", asset_id)
 
@@ -58,7 +58,7 @@ class MLflowGateway:
             if metrics is not None:
                 mlflow.log_metrics(metrics)
 
-            # Register model (creates new version under model_name name)
+            # Register model (creates new version under registered_model_name)
             model_info = mlflow.sklearn.log_model(
                 model,
                 "model",
@@ -70,9 +70,9 @@ class MLflowGateway:
         model_version = model_info.registered_model_version
         self.mlflow_client.set_registered_model_alias(name=run_name, alias="champion", version=model_version)
 
-    def load_model(self, model_name: str, asset_id: int | None = None) -> tuple[BaseModel, dict[str, Any]]:
+    def load_model(self, model_type: str, asset_id: int | None = None) -> tuple[BaseModel, dict[str, Any]]:
         """Load trained model from MLflow Model Registry."""
-        registered_model_name = f"{model_name}_client_{self.client_name}"
+        registered_model_name = f"{model_type}_client_{self.client_name}"
         if asset_id is not None:
             registered_model_name += f"_asset_{asset_id}"
 

@@ -96,7 +96,7 @@ def train_task(
     # Get and run the task's train function from registry
     try:
         train_func = get_task_handler(task, "train")
-        train_func(asset_ids=asset_ids, task_name=task, model_name=model)
+        train_func(asset_ids=asset_ids, task_name=task, model_type=model)
     except KeyError as e:
         typer.echo(f"❌ {e}", err=True)
         raise typer.Exit(code=1)
@@ -122,7 +122,7 @@ def predict_task(
     # Get and run the task's predict function from registry
     try:
         predict_func = get_task_handler(task, "predict")
-        predict_func(asset_ids=asset_ids, task_name=task, model_name=model, start_date=start_date)
+        predict_func(asset_ids=asset_ids, task_name=task, model_type=model, start_date=start_date)
     except KeyError as e:
         typer.echo(f"❌ {e}", err=True)
         raise typer.Exit(code=1)
@@ -133,8 +133,8 @@ def list_tasks() -> None:
     """List all available ML tasks."""
     typer.echo("Available ML tasks:\n")
     for task_name, config in TASK_CONFIG_REGISTRY.items():
-        model_name = getattr(config, "default_model_name", "N/A")
-        typer.echo(f"  • {task_name:<30} (model: {model_name})")
+        model_type = getattr(config, "default_model_type", "N/A")
+        typer.echo(f"  • {task_name:<30} (model: {model_type})")
     typer.echo(f"\nTotal: {len(TASK_CONFIG_REGISTRY)} tasks")
 
 

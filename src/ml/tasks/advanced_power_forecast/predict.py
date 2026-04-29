@@ -68,7 +68,7 @@ def predict_one_asset(
     context.logger.info(f"Predicting for asset {asset_id} with {len(data)} timestamps")
 
     # Get Model
-    model, params = context.mlflow_gateway.load_model(context.model_name, asset_id)
+    model, params = context.mlflow_gateway.load_model(context.model_type, asset_id)
     providers = params.get("providers", [])
 
     # Preprocess
@@ -99,7 +99,7 @@ def predict_one_asset(
 def predict(
     asset_ids: str = "all",
     task_name: str = "advanced_power_forecast",
-    model_name: str | None = None,
+    model_type: str | None = None,
     start_date: datetime | None = None,
 ) -> pd.DataFrame:
     """Generate predictions for a specific asset.
@@ -107,14 +107,14 @@ def predict(
     Args:
         asset_ids: Asset identifier(s) - single int, comma-separated, or 'all'
         task_name: Task name
-        model_name: Model to use (optional, uses config default if not provided)
+        model_type: Model to use (optional, uses config default if not provided)
         start_date: Start datetime (default: now)
 
     Returns:
         DataFrame with timestamps and predictions
     """
-    # Context: Model Name, Task Config, Logger, MLflow Gateway
-    context = get_context(task_name=task_name, model_name=model_name)
+    # Context: Model Type, Task Config, Logger, MLflow Gateway
+    context = get_context(task_name=task_name, model_type=model_type)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)
 
@@ -125,7 +125,7 @@ def predict(
     )
 
     context.logger.info(
-        f"Starting predictions for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_name}'"
+        f"Starting predictions for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_type}'"
     )
 
     dict_inputs_all_assets = get_prediction_inputs_all_assets(list_asset_ids, start_date, end_date, delta_minutes)

@@ -10,14 +10,14 @@ MODEL_REGISTRY = {
 }
 
 
-def get_model(model_name: str, params: dict | None = None) -> BaseModel:
-    """Get a model instance by model name.
+def get_model(model_type: str, params: dict | None = None) -> BaseModel:
+    """Get a model instance by model type.
 
     Args:
-        model_name: Name of the model to instantiate
+        model_type: Type of the model to instantiate
         params: Optional parameters to pass to the model constructor
 
     Returns:
         Instantiated model
     """
-    return MODEL_REGISTRY[model_name](params=params)
+    return MODEL_REGISTRY[model_type](params=params)

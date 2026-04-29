@@ -14,7 +14,7 @@ class AdvancedPowerForecastConfig(BaseTaskConfig):
     task_name: str = "advanced_power_forecast"
 
     # Model Configuration
-    default_model_name: str = "positive_linear"
+    default_model_type: str = "positive_linear"
     available_models: list[str] = ["positive_linear", "xgboost", "random_forest"]
 
     # Model-specific parameters (optional overrides for each model)

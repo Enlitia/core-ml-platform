@@ -10,7 +10,7 @@ class XGBoostModel(BaseModel):
     """XGBoost Regressor for Advanced Power Forecast."""
 
     def __init__(self, params: dict | None = None) -> None:
-        self.model_name = "xgboost"
+        self.model_type = "xgboost"
         self.params = params or {}
         self.model = xgb.XGBRegressor(**self.params)
         self.feature_names_: list[str] = []

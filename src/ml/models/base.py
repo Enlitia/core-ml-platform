@@ -16,10 +16,10 @@ class BaseModel(ABC, BaseEstimator):
             params: Model-specific hyperparameters and configuration options.
 
         Attributes must be set by subclasses:
-            model_name: The name of the model (e.g., 'kd3', 'positive_linear', 'xgboost').
+            model_type: The type of the model (e.g., 'kd3', 'positive_linear', 'xgboost').
                       Used for model identification and MLflow tracking.
         """
-        self.model_name: str
+        self.model_type: str
         self.params = params if params is not None else {}
 
     @abstractmethod

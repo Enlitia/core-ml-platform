@@ -15,7 +15,8 @@ class TemplateTaskConfig(BaseTaskConfig):
 
     # Required: Task and Model Configuration
     task_name: str = "your_task_name"  # TODO: Change to match folder name
-    model_name: str = "positive_linear"  # TODO: Choose model from MODEL_REGISTRY
+    default_model_type: str = "positive_linear"  # TODO: Choose model from MODEL_REGISTRY
+    available_models: list[str] = ["positive_linear", "xgboost", "random_forest"]  # TODO: Adjust as needed
 
     # Optional: Training parameters
     training_interval: str = "1 year"

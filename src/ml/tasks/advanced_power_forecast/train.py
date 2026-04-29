@@ -93,8 +93,8 @@ def train_one_asset(data: pd.DataFrame, asset_id: int, context: Context) -> None
     context.logger.info(f"Training asset {asset_id} with {len(data)} samples")
 
     # Get model-specific params from config (if any)
-    model_params = context.task_config.model_params.get(context.model_name)
-    model = get_model(context.model_name, params=model_params)
+    model_params = context.task_config.model_params.get(context.model_type)
+    model = get_model(context.model_type, params=model_params)
 
     # Validations
     validate_out_of_range(data, "power_real", 0, context.task_config.power_max, asset_id)
@@ -123,14 +123,14 @@ def train_one_asset(data: pd.DataFrame, asset_id: int, context: Context) -> None
 def train(
     asset_ids: str = "all",
     task_name: str = "advanced_power_forecast",
-    model_name: str | None = None,
+    model_type: str | None = None,
 ) -> None:
-    # Context: Model Name, Task Config, Logger, MLflow Gateway
-    context = get_context(task_name=task_name, model_name=model_name)
+    # Context: Model Type, Task Config, Logger, MLflow Gateway
+    context = get_context(task_name=task_name, model_type=model_type)
 
     list_asset_ids = select_only_valid_asset_ids(asset_ids)
     context.logger.info(
-        f"Starting training for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_name}'"
+        f"Starting training for {len(list_asset_ids)} asset(s): {list_asset_ids} using model '{context.model_type}'"
     )
 
     dict_inputs_all_assets = get_training_inputs_all_assets(list_asset_ids, context)

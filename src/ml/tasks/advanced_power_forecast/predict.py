@@ -57,7 +57,7 @@ def predict_one_asset(
         "available_date",
         "prediction_date",
         "asset_id",
-        "model_name",
+        "model_id",
         "forecast_value",
         "lower_limit",
         "upper_limit",
@@ -70,6 +70,10 @@ def predict_one_asset(
     # Get Model
     model, params = context.mlflow_gateway.load_model(context.model_name, asset_id)
     providers = params.get("providers", [])
+    model_id = params.get("model_id")
+
+    if not model_id:
+        raise ValueError(f"model_id not found in MLflow params for {context.model_name}. Please retrain the model.")
 
     # Preprocess
     X = preprocess_prediction_data(data, providers)
@@ -85,7 +89,7 @@ def predict_one_asset(
             "available_date": start_date,
             "prediction_date": X.index.values,
             "asset_id": asset_id,
-            "model_name": context.model_name,
+            "model_id": model_id,
             "forecast_value": predictions,
             "lower_limit": [None] * len(predictions),
             "upper_limit": [None] * len(predictions),

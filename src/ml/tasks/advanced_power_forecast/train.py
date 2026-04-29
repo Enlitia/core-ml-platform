@@ -6,7 +6,11 @@ from ml.common.split_data import split_data_by_day
 from ml.common.validations import validate_inputs_training, validate_model_quality, validate_out_of_range
 from ml.context import Context, get_context
 from ml.models import BaseModel, get_model
-from ml.queries.advanced_power_forecast import fetch_power_forecast_data_for_train, fetch_power_real_data_for_train
+from ml.queries.advanced_power_forecast import (
+    fetch_power_forecast_data_for_train,
+    fetch_power_real_data_for_train,
+    get_ml_model_id,
+)
 from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
@@ -75,7 +79,10 @@ def save_model(
     providers: list[str] = X.columns.tolist()
     input_example: pd.DataFrame = X.head(1)
 
-    log_params = {"providers": providers, **(model_params or {})}
+    # Get model_id from model_name (will be used when saving predictions)
+    model_id = get_ml_model_id(context.model_name)
+
+    log_params = {"model_id": model_id, "providers": providers, **(model_params or {})}
 
     context.mlflow_gateway.save_model(
         model=model,

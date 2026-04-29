@@ -1,9 +1,35 @@
 from datetime import datetime
 
 import pandas as pd
-from base_models.machine_learning import AdvancedPowerForecastData
+from base_models.machine_learning import AdvancedPowerForecastData, MLModel
 from toolkit.data.query import Query
 from toolkit.database import database
+
+
+# Helper function
+
+
+def get_ml_model_id(model_name: str) -> int:
+    """Get model_id from model_name by querying ml_model table.
+
+    Args:
+        model_name: Name of the ML model (e.g., 'xgboost', 'positive_linear')
+
+    Returns:
+        int: The model.id from machine_learning.ml_model table
+
+    Raises:
+        ValueError: If model_name not found in ml_model table
+    """
+    with database.session() as session:
+        model = session.query(MLModel).filter(MLModel.name == model_name).first()
+        if not model:
+            raise ValueError(
+                f"Model '{model_name}' not found in ml_model table. "
+                f"Please ensure the model exists in machine_learning.ml_model"
+            )
+        return int(model.id)
+
 
 # Train Advanced Power Forecast
 
@@ -112,7 +138,7 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
 
     Expected DataFrame columns:
         - asset_id: int
-        - model_name: str (e.g., 'positive_linear', 'xgboost')
+        - model_id: int (FK to machine_learning.ml_model.id)
         - available_date: datetime
         - prediction_date: datetime
         - forecast_value: float
@@ -124,10 +150,10 @@ def save_advanced_power_forecast_predictions(df: pd.DataFrame) -> None:
 
     with database.session() as session:
         for _, row in df.iterrows():
-            # Create ORM object - merge will INSERT or UPDATE based on unique constraint
+            # Create ORM object - merge will INSERT or UPDATE based on primary key
             prediction = AdvancedPowerForecastData(
                 asset_id=int(row["asset_id"]),
-                model_name=str(row["model_name"]),
+                model_id=int(row["model_id"]),
                 available_date=row["available_date"],
                 prediction_date=row["prediction_date"],
                 forecast_value=float(row["forecast_value"]),

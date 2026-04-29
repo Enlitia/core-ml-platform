@@ -9,8 +9,8 @@ from ml.models import BaseModel, get_model
 from ml.queries.advanced_power_forecast import (
     fetch_power_forecast_data_for_train,
     fetch_power_real_data_for_train,
-    get_ml_model_id,
 )
+from ml.queries.ml_models import get_ml_model_id
 from ml.tasks.advanced_power_forecast.utils.preprocess import preprocess_power_forecast_data
 
 app = typer.Typer()
